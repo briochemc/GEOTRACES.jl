@@ -1,4 +1,4 @@
-# GEOTRACESTools.jl
+# GEOTRACES.jl
 
 A package for reading and using GEOTRACES data in Julia.
 
