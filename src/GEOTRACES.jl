@@ -1,4 +1,4 @@
-module GEOTRACESTools
+module GEOTRACES
 
 using OceanographyCruises
 using NCDatasets, Unitful, Dates, Match
@@ -96,9 +96,16 @@ end
 
 
 """
-    observations(tracers::String...)
+    observations(tracer1, tracer2, tracer3, ...)
 
-Returns the GEOTRACES observations of tracers `tracers`.
+Returns the GEOTRACES observations of the given tracers.
+
+### Example usage
+
+```
+x, y, z, ... = observations(tracer1, tracer2, tracer3, ...)
+x = observations(tracer1)
+```
 """
 function observations(ds::Dataset, tracers::String...)
     fs = ((unitfunction(ds[tracer_str(tracer)].attrib["units"]) for tracer in tracers)...,)
@@ -106,11 +113,17 @@ function observations(ds::Dataset, tracers::String...)
     ikeep = findall(i -> !any(ismissing.(getindex.(vs, i))), eachindex(vs[1]))
     return ((f.(float.(view(v, ikeep))) for (f,v) in zip(fs,vs))...,)
 end
+function observations(ds::Dataset, tracer::String)
+    f = unitfunction(ds[tracer_str(tracer)].attrib["units"])
+    v = ds[tracer_str(tracer)][:]
+    ikeep = findall(!ismissing, v)
+    return f.(float.(view(v, ikeep)))
+end
 
 """
-    metadata(tracers::String..., metadakeys::Tuple)
+    metadata(tracer1, tracer2, tracer3, ...)
 
-Returns the GEOTRACES metadata for tracers `tracers`.
+Returns the GEOTRACES metadata for given tracers.
 """
 function metadata(ds::Dataset, tracers::String...; metadatakeys=("latitude", "longitude", "depth"))
     vs = ((ds[tracer_str(tracer)][:] for tracer in tracers)...,)
@@ -142,7 +155,7 @@ end
 
 # open and close ds if not provided
 for f in [:observations, :metadata, :transect, :transects, :list_of_cruises,
-         :list_of_stations, :CruiseTrack, :standard_deviations]
+         :list_of_stations, :CruiseTrack, :standard_deviations, :variable, :matchingvariables]
     @eval begin
         $f(args...; kwargs...) =
         Dataset(GEOTRACES_IDP17_DiscreteSamples_path(), "r") do ds

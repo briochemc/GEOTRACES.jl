@@ -34,7 +34,7 @@ function tracervariable(ds::Dataset, tracer::String)
     return length(vars) > 1 ? error("duplicate tracers. This is a bug") : vars[1]
 end
 
-
+variable(ds::Dataset, tracer::String) = println(ds[tracer_str(tracer)])
 
 # Special treatment for metadata
 
@@ -43,8 +43,8 @@ metadatakeyvaluepair(v, idx) = @match name(v) begin
     "metavar2"  => (:Station, reduce.(string, filter.(!=('\0'), eachcol(v.var[:,:])))[[i.I[2] for i in idx]])
     "longitude" => (:Longitude, float.(v.var[[i.I[2] for i in idx]]))
     "latitude"  => (:Latitude, float.(v.var[[i.I[2] for i in idx]]))
-    "var2"      => (:Depth, float.(v.var[idx]))
-    "var1"      => (:Pressure, float.(v.var[idx]))
+    "var2"      => (:Depth, unitfunction(v.attrib["units"]).(float.(v.var[idx])))
+    "var1"      => (:Pressure, unitfunction(v.attrib["units"]).(float.(v.var[idx])))
     "date_time" => (:DateTime, DateTime.(v[[i.I[2] for i in idx]]))
     _           => (Symbol(name(v)), float.(v.var[idx]))
 end
@@ -73,6 +73,8 @@ tracer_str(str::String) = @match lowercase(str) begin
     "cd" || "cadmium"                                                     => "var70"
     "fe" || "iron" || "dissolved iron" || "dfe"                           => "var73"
     "ni" || "nickel"                                                      => "var83"
+    "δcd" || "δ¹¹⁰cd" || "δ110cd" || "δcadmium"                           => "var116"
+    "δfe" || "δ⁵⁴fe" || "δ54fe" || "δiron"                                => "var117"
     _ => begin
              @warn "variable $str was not properly recognized"
              str
@@ -81,15 +83,16 @@ end
 
 
 """
-    isotope_str(tracer)
+    isotope(tracer)
 
 Returns the GEOTRACES variable name of the isotope of tracer `str`.
 """
-isotope_str(tracer::String) = @match lowercase(tracer) begin
-    "cd" || "cadmium"       => "var116"
-    "fe" || "iron" || "dfe" => "var73"
+isotope(tracer::String) = @match lowercase(tracer) begin
+    "cd" || "cadmium"       => "δcd"
+    "fe" || "iron" || "dfe" => "δfe"
     _ => str
 end
+export isotope
 
 
 
