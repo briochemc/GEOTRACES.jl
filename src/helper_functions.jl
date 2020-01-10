@@ -34,7 +34,7 @@ function tracervariable(ds::Dataset, tracer::String)
     return length(vars) > 1 ? error("duplicate tracers. This is a bug") : vars[1]
 end
 
-variable(ds::Dataset, tracer::String) = println(ds[tracer_str(tracer)])
+variable(ds::Dataset, tracer::String) = println(ds[varname(tracer)])
 
 # Special treatment for metadata
 
@@ -52,11 +52,11 @@ end
 
 
 """
-    tracer_str(str)
+    varname(tracer)
 
-Returns the GEOTRACES variable name that "matches" `str`.
+Returns the GEOTRACES variable name that "matches" `tracer`.
 """
-tracer_str(str::String) = @match lowercase(str) begin
+varname(tracer::String) = @match lowercase(tracer) begin
     "cruise"                                                              => "metavar1"
     "station"                                                             => "metavar2"
     "lat" || "latitude"                                                   => "latitude"
@@ -64,19 +64,19 @@ tracer_str(str::String) = @match lowercase(str) begin
     "pressure"                                                            => "var1"
     "depth" || "depths"                                                   => "var2"
     "date" || "datetime" || "date/time" || "date and time" || "date time" => "date_time"
-    "salinity"                                                            => "var8"
     "t" || "temp" || "temperature"                                        => "var7"
-    "no₃" || "no3" || "nitrate"                                           => "var23"
-    "po₄" || "po4" || "phosphate"                                         => "var21"
-    "si" || "si(oh)₄" || "silicate"                                       => "var24"
-    "o2" || "o₂" || "oxygen" || "dioxygen"                                => "var19"
+    "salinity"                                                            => "var8"
     "he" || "helium"                                                      => "var14"
+    "o2" || "o₂" || "oxygen" || "dioxygen"                                => "var19"
+    "po₄" || "po4" || "phosphate"                                         => "var21"
+    "no₃" || "no3" || "nitrate"                                           => "var23"
+    "si" || "si(oh)₄" || "silicate"                                       => "var24"
     "cd" || "cadmium"                                                     => "var70"
     "fe" || "iron" || "dissolved iron" || "dfe"                           => "var73"
     "ni" || "nickel"                                                      => "var83"
     "δcd" || "δ¹¹⁰cd" || "δ110cd" || "δcadmium"                           => "var116"
     "δfe" || "δ⁵⁴fe" || "δ54fe" || "δiron"                                => "var117"
-    _ => str
+    _ => tracer
 end
 
 
@@ -98,13 +98,8 @@ export isotope
 
 Returns the GEOTRACES variable name of the standard deviation of tracer `str`.
 """
-function stdvarname(ds::Dataset, tracer::String)
-    longname = string("Standard deviation of ", ds[tracer_str(tracer)].attrib["long_name"])
-    vars = varbyattrib(ds, long_name=longname)
-    length(vars) > 1 && error("multiple variables for '$longname'")
-    length(vars) == 0 && error("no variable '$longname'")
-    return name(vars[1])
-end
+stdvarname(tracer::String) = string(varname(tracer), "_STD")
+
 
 
 

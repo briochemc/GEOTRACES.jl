@@ -36,7 +36,7 @@ List of things you might want to extract from GEOTRACES data:
        FORTRAN_format       = F12.3
        _FillValue           = -1.0e10
     ```
-    These shortcuts are matched to the GEOTRACES variable names in the `tracer_str` function.
+    These shortcuts are matched to the GEOTRACES variable names in the `varname` function.
     PRs or suggestions to add new shortcut names are welcome!
 
 - A vector of the concentrations of a tracer, e.g., Cadmium, with units (using [Unitful.jl](https://github.com/PainterQubits/Unitful.jl)), with missing values skipped, is returned by:

@@ -108,14 +108,14 @@ x = observations(tracer1)
 ```
 """
 function observations(ds::Dataset, tracers::String...)
-    fs = ((unitfunction(ds[tracer_str(tracer)].attrib["units"]) for tracer in tracers)...,)
-    vs = ((ds[tracer_str(tracer)][:] for tracer in tracers)...,)
+    fs = ((unitfunction(ds[varname(tracer)].attrib["units"]) for tracer in tracers)...,)
+    vs = ((ds[varname(tracer)][:] for tracer in tracers)...,)
     ikeep = findall(i -> !any(ismissing.(getindex.(vs, i))), eachindex(vs[1]))
     return ((f.(float.(view(v, ikeep))) for (f,v) in zip(fs,vs))...,)
 end
 function observations(ds::Dataset, tracer::String)
-    f = unitfunction(ds[tracer_str(tracer)].attrib["units"])
-    v = ds[tracer_str(tracer)][:]
+    f = unitfunction(ds[varname(tracer)].attrib["units"])
+    v = ds[varname(tracer)][:]
     ikeep = findall(!ismissing, v)
     return f.(float.(view(v, ikeep)))
 end
@@ -126,10 +126,10 @@ end
 Returns the GEOTRACES metadata for given tracers.
 """
 function metadata(ds::Dataset, tracers::String...; metadatakeys=("latitude", "longitude", "depth"))
-    vs = ((ds[tracer_str(tracer)][:] for tracer in tracers)...,)
+    vs = ((ds[varname(tracer)][:] for tracer in tracers)...,)
     ikeep = findall(i -> !any(ismissing.(getindex.(vs, i))), eachindex(vs[1]))
     ikeep = CartesianIndices(size(vs[1]))[ikeep]
-    GEOTRACESmetadatakeys = tracer_str.(metadatakeys)
+    GEOTRACESmetadatakeys = varname.(metadatakeys)
     metadata = [metadatakeyvaluepair(ds[k], ikeep) for k in GEOTRACESmetadatakeys]
     namedmetadata = (; metadata...)
     return namedmetadata
@@ -143,23 +143,23 @@ end
 # - the STD along each cruise?
 # - the total STD?
 function standarddeviations(ds::Dataset, tracer::String)
-    _, s = observations(ds, tracer_str(tracer), stdvarname(ds, tracer))
+    _, s = observations(ds, varname(tracer), stdvarname(tracer))
     return s
 end
 
 function standarddeviations(ds::Dataset, tracers::String...)
-    x_and_s = observations(ds, tracer_str.(tracers)..., (stdvarname(ds, t) for t in tracers)...)
+    x_and_s = observations(ds, varname.(tracers)..., stdvarname.(tracers)...)
     return x_and_s[length(tracers)+1:end]
 end
 
 
 function observations_with_std(ds::Dataset, tracer::String)
-    x, s = observations(ds, tracer_str(tracer), stdvarname(ds, tracer))
+    x, s = observations(ds, varname(tracer), stdvarname(tracer))
     u = unit(x[1])
     return @. (ustrip(x) ± ustrip(s)) * u
 end
 function observations_with_std(ds::Dataset, tracers::String...)
-    x_and_s = observations(ds, tracer_str.(tracers)..., (stdvarname(ds, t) for t in tracers)...)
+    x_and_s = observations(ds, varname.(tracers)..., stdvarname.(tracers)...)
     n = length(tracers)
     us = ((unit(x[1]) for x in x_and_s[1:n])...,)
     return (((ustrip.(x_and_s[i]) .± ustrip.(x_and_s[i+n])) * us[i] for i in 1:n)...,)
