@@ -2,103 +2,130 @@
 
 A package for reading and using GEOTRACES data in Julia.
 
-In order to use this software, you must first download the GEOTRACES IDP 17 data as nc files.
+In order to use this software, you must first download the GEOTRACES IDP 17 data as a NetCDF file and place it in a `Data` directory in your local "home" directory. That is, the path for the NetCDF file should be:
 
-For the discrete sample data, make sure it is located in a `Data` directory in your "home" directory. That is it should be there:
 ```
 $HOME/Data/GEOTRACES/GEOTRACES_IDP2017_v2 2/discrete_sample_data/netcdf/GEOTRACES_IDP2017_v2_Discrete_Sample_Data.nc
 ```
 
-Downloading the data manually is unfortunately mandatory at this stage.
+(You should be able to do `$ echo $HOME` in the terminal to find out where `$HOME` is.)
 
-# Data names
+The GEOTRACES data management committee does not allow third party distribution of its data and does not provide a public URL pointing directly to the data.
+However **the GEOTRACES datasets are publicly accessible, but must be *manually* downloaded**.
+(This goes against core principles of open science, but the author of the GEOTRACES.jl package respects the decision of the many contributors that have agreed on these limitations.)
 
-This serves as a reference for accessing data in the GEOTRACES NetCDF files.
 
-These are the first ~30 variables of the GEOTRACES NetCDF file.
 
-|      name |                              long_name |        size |                               unit |
-|-----------|----------------------------------------|-------------|------------------------------------|
-|  metavar1 |                                 Cruise |   (6, 1866) |                                  ? |
-|  metavar2 |                                Station |  (20, 1866) |                                  ? |
-|  metavar3 |                                   Type |     (1866,) |                                  ? |
-| longitude |                              Longitude |     (1866,) |                       degrees_east |
-|  latitude |                               Latitude |     (1866,) |                      degrees_north |
-| date_time |  Decimal Gregorian Days of the station |     (1866,) | days since 0006-01-01 00:00:00 UTC |
-|      var1 |                               PRESSURE | (698, 1866) |                               dbar |
-|      var2 |                                  DEPTH | (698, 1866) |                                  m |
-|      var3 |                GEOTRACES Sample Number | (698, 1866) |                                  ? |
-|      var4 |                          Bottle Number | (698, 1866) |                                  ? |
-|      var5 |                     BODC Bottle Number | (698, 1866) |                                  ? |
-|      var6 |                        Firing Sequence | (698, 1866) |                                  ? |
-|  var6_STD |  Standard deviation of Firing Sequence | (698, 1866) |                                  ? |
-|      var7 |                                 CTDTMP | (698, 1866) |                              deg C |
-|      var8 |                                 CTDSAL | (698, 1866) |                                  ? |
-|      var9 |                 SALINITY_D_CONC_BOTTLE | (698, 1866) |                                  ? |
-|     var10 |                   CFC-11_D_CONC_BOTTLE | (698, 1866) |                            pmol/kg |
-|     var11 |                   CFC-12_D_CONC_BOTTLE | (698, 1866) |                            pmol/kg |
-|     var12 |                   CFC113_D_CONC_BOTTLE | (698, 1866) |                            pmol/kg |
-|     var13 |                      SF6_D_CONC_BOTTLE | (698, 1866) |                            fmol/kg |
-|     var14 |                       He_D_CONC_BOTTLE | (698, 1866) |                            nmol/kg |
-| var14_STD | Standard deviation of He_D_CONC_BOTTLE | (698, 1866) |                            nmol/kg |
-|     var15 |                       Ne_D_CONC_BOTTLE | (698, 1866) |                            nmol/kg |
-| var15_STD | Standard deviation of Ne_D_CONC_BOTTLE | (698, 1866) |                            nmol/kg |
-|     var16 |                       Ar_D_CONC_BOTTLE | (698, 1866) |                            umol/kg |
-| var16_STD | Standard deviation of Ar_D_CONC_BOTTLE | (698, 1866) |                            umol/kg |
-|     var17 |                       Kr_D_CONC_BOTTLE | (698, 1866) |                            nmol/kg |
-| var17_STD | Standard deviation of Kr_D_CONC_BOTTLE | (698, 1866) |                            nmol/kg |
-|     var18 |                       Xe_D_CONC_BOTTLE | (698, 1866) |                            nmol/kg |
-| var18_STD | Standard deviation of Xe_D_CONC_BOTTLE | (698, 1866) |                            nmol/kg |
-
-The most common metadata one wants with a given tracer(s) is just location data.
-So the default behavior of `observations(tracer)` is to return a n×4 array of
-
-| value | latitude | longitude | depth |
-
-Also given the arrangement and units, it is a good idea to have special treatment for `metavar`s, `lat`/`lon`, dates, and IDs/numbers.
-
-## Tools
+### Tools
 
 List of things you might want to extract from GEOTRACES data:
 
-- A vector of the concentrations of a tracer, e.g., `tracer = "Cd"`.
-    Optionally, some metadata of that tracer's observations, like location, date, etc.
-    The following functions should work and give what you expect:
+- Most GEOTRACES variable names are not explicit (e.g., `var70` for Cadmium).
+    For this reason, GEOTRACES.jl provides shortcut names for common tracers/variables.
+    To check which variable they correspond to, you can do (taking Cadmium as an example)
+    ```julia
+    julia> variable("Cd")
+    var70 (698 × 1866)
+      Datatype:    Float32
+      Dimensions:  N_SAMPLES × N_STATIONS
+      Attributes:
+       long_name            = Cd_D_CONC_BOTTLE
+       units                = nmol/kg
+       comment              = Concentration of dissolved Cd
+       C_format             = %.3f
+       FORTRAN_format       = F12.3
+       _FillValue           = -1.0e10
+    ```
+    These shortcuts are matched to the GEOTRACES variable names in the `tracer_str` function.
+    PRs or suggestions to add new shortcut names are welcome!
+
+- A vector of the concentrations of a tracer, e.g., Cadmium, with units (using [Unitful.jl](https://github.com/PainterQubits/Unitful.jl)), with missing values skipped, is returned by:
 
     ```julia
-    Cd = observations("Cd") # Cd obs with units
-    MD = metadata("Cd")     # a (lat, lon, depth) NTuple
-    MD = metadata("Cd", metadatakeys=("lat", "lon", "depth")) # same as above
-    MD = metadata("Cd", metadatakeys=("lat", "date"))         # just (lat, date)
+    julia> Cd = observations("Cd")
+    7108-element Array{Quantity{Float32,𝐍*𝐌^-1,Unitful.FreeUnits{(kg^-1, nmol),𝐍*𝐌^-1,nothing}},1}:
+     0.0528f0 nmol kg^-1
+     0.0697f0 nmol kg^-1
+     0.1557f0 nmol kg^-1
+                       ⋮
+     1.0396f0 nmol kg^-1
+     1.0376f0 nmol kg^-1
+     1.0307f0 nmol kg^-1
     ```
 
-    - TODO: some uncertainty might be given as a standard deviation, in which case you can use
+- To get the corresponding metadata of that tracer's observations, like location, date, etc., one can do
 
-        ```julia
-        Cd_std = standarddeviations("Cd") # STD if they exist
-        Cd = observations_and_std("Cd")   # Cd ± Cd_std (using Measurments.jl)
-        ```
+    ```julia
+    julia> MD = metadata("Cd") ; # a (lat, lon, depth) named tuple
 
-- Sometimes you want to extract data for two tracers, to make comparisons. So you might want them only where/when both are observed.
+    julia> MD.Depth
+    7108-element Array{Quantity{Float32,𝐋,Unitful.FreeUnits{(m,),𝐋,nothing}},1}:
+       10.0f0 m
+       25.0f0 m
+       51.0f0 m
+              ⋮
+     1101.0f0 m
+     1198.0f0 m
+     1300.0f0 m
+
+    julia> MD.Latitude
+    7108-element Array{Float32,1}:
+     -49.5472
+     -49.5472
+     -49.5472
+       ⋮
+      48.65
+      48.65
+      48.65
+    ```
+
+    The default is `(lat, lon, depth)` but you can also specify which metadata you want with the `metadatakeys` keyword with a tuple of the metadata names (shortcuts like `"lat"` and `"lon"` provided).
+    For example, `MD` below contains latitude and date information of where/when Cadmium was observed:
+
+    ```julia
+    julia> MD = metadata("Cd", metadatakeys=("lat", "date")) ; # just (lat, date)
+    
+    julia> MD.DateTime
+    7108-element Array{Dates.DateTime,1}:
+     2011-03-05T19:28:00
+     2011-03-05T19:28:00
+     2011-03-05T19:28:00
+     ⋮
+     2012-08-17T00:18:42
+     2012-08-17T00:18:42
+     2012-08-17T00:18:42
+    ```
+
+- Data organized into cruise transects and profiles using the [OceanographyCruises.jl](https://github.com/briochemc/OceanographyCruises.jl) package
+
+    ```julia
+    Cd_transects = transects("Cd")
+    Cd_transect = transects("Cd", "GA02")
+    ```
+
+- GEOTRACES variables sometimes come with a standard deviation, in which case you can use
+
+    ```julia
+    Cd_std = standarddeviations("Cd") # STD if it exists
+    Cd = observations_with_std("Cd")  # Cd ± Cd_std (using Measurments.jl)
+    ```
+
+    > **Note**: we do not recommend it at this stage because a most of the GEOTRACES data comes with no quantification of uncertainty.
+
+- Sometimes you want to extract data for two or more tracers. So you might want them only where/when these are observed simultaneously.
 
     ```julia
     Cd, PO₄, DFe = observations("Cd", "PO₄", "DFe") # Cd, PO₄, and DFe obs with units
     MD = metadata("Cd", "PO₄", "DFe")          # a (lat, lon, depth) NTuple
     MD = metadata("Cd", "PO₄", "DFe", metadatakeys=("lat", "lon", "depth")) # same as above
     MD = metadata("Cd", "PO₄", "DFe", metadatakeys=("lat", "date"))         # just (lat, date)
+    Cd_std, PO₄_std = standarddeviations("Cd", "PO₄") # STD if they exist
+    Cd, PO₄ = observations_with_std("Cd", "PO₄")      # Cd ± Cd_std, PO₄ ± PO₄_std
     ```
 
-    - TODO: For uncertainty you can use
+## TODO
 
-        ```julia
-        tracers = ("Cd", "PO₄")
-        Cd_std, PO₄_std = standarddeviations(tracers) # STD if they exist
-        Cd, PO₄ = observations_and_std(tracers)   # Cd ± std, PO₄ ± std
-        ```
+- Deal with uncertainty on a transect or profile/station basis, by taking the maximum of the available std, the minimum observed diff, the last significant digit?
+- plotting recipes mimicing Ocean Data View
+- figure out a way to CI despite the GEOTRACES data-access restrictions
 
-- Data organized into cruise transects and profiles
-
-    ```julia
-    Cd_transects = transects("Cd")
-    Cd_transect = transects("Cd", "GA02")
-    ```

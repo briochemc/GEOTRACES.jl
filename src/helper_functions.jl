@@ -64,7 +64,8 @@ tracer_str(str::String) = @match lowercase(str) begin
     "pressure"                                                            => "var1"
     "depth" || "depths"                                                   => "var2"
     "date" || "datetime" || "date/time" || "date and time" || "date time" => "date_time"
-    "salinity"                                                            => "var9"
+    "salinity"                                                            => "var8"
+    "t" || "temp" || "temperature"                                        => "var7"
     "no₃" || "no3" || "nitrate"                                           => "var23"
     "po₄" || "po4" || "phosphate"                                         => "var21"
     "si" || "si(oh)₄" || "silicate"                                       => "var24"
@@ -75,10 +76,7 @@ tracer_str(str::String) = @match lowercase(str) begin
     "ni" || "nickel"                                                      => "var83"
     "δcd" || "δ¹¹⁰cd" || "δ110cd" || "δcadmium"                           => "var116"
     "δfe" || "δ⁵⁴fe" || "δ54fe" || "δiron"                                => "var117"
-    _ => begin
-             @warn "variable $str was not properly recognized"
-             str
-         end
+    _ => str
 end
 
 
@@ -93,6 +91,21 @@ isotope(tracer::String) = @match lowercase(tracer) begin
     _ => str
 end
 export isotope
+
+
+"""
+    stdvarname(tracer)
+
+Returns the GEOTRACES variable name of the standard deviation of tracer `str`.
+"""
+function stdvarname(ds::Dataset, tracer::String)
+    longname = string("Standard deviation of ", ds[tracer_str(tracer)].attrib["long_name"])
+    vars = varbyattrib(ds, long_name=longname)
+    length(vars) > 1 && error("multiple variables for '$longname'")
+    length(vars) == 0 && error("no variable '$longname'")
+    return name(vars[1])
+end
+
 
 
 

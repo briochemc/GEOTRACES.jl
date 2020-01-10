@@ -142,20 +142,33 @@ end
 # - the number of significant digits of each tracer per cruise?
 # - the STD along each cruise?
 # - the total STD?
+function standarddeviations(ds::Dataset, tracer::String)
+    _, s = observations(ds, tracer_str(tracer), stdvarname(ds, tracer))
+    return s
+end
 
-function standard_deviations(ds::Dataset, tracer::String)
-    longname = string("Standard deviation of ", ds[tracer_str(tracer)].attrib["long_name"])
-    vars = varbyattrib(ds, long_name=longname)
-    length(vars) > 1 && error("multiple variables for '$longname'")
-    length(vars) == 0 && error("no variable '$longname'")
-    var = vars[1]
-    unitf = unitfunction(var.attrib["units"])
-    return unitf(float.(filter(!ismissing, var[:])))
+function standarddeviations(ds::Dataset, tracers::String...)
+    x_and_s = observations(ds, tracer_str.(tracers)..., (stdvarname(ds, t) for t in tracers)...)
+    return x_and_s[length(tracers)+1:end]
+end
+
+
+function observations_with_std(ds::Dataset, tracer::String)
+    x, s = observations(ds, tracer_str(tracer), stdvarname(ds, tracer))
+    u = unit(x[1])
+    return @. (ustrip(x) ± ustrip(s)) * u
+end
+function observations_with_std(ds::Dataset, tracers::String...)
+    x_and_s = observations(ds, tracer_str.(tracers)..., (stdvarname(ds, t) for t in tracers)...)
+    n = length(tracers)
+    us = ((unit(x[1]) for x in x_and_s[1:n])...,)
+    return (((ustrip.(x_and_s[i]) .± ustrip.(x_and_s[i+n])) * us[i] for i in 1:n)...,)
 end
 
 # open and close ds if not provided
 for f in [:observations, :metadata, :transect, :transects, :list_of_cruises,
-         :list_of_stations, :CruiseTrack, :standard_deviations, :variable, :matchingvariables]
+         :list_of_stations, :CruiseTrack, :variable,
+         :standarddeviations, :matchingvariables, :observations_with_std]
     @eval begin
         $f(args...; kwargs...) =
         Dataset(GEOTRACES_IDP17_DiscreteSamples_path(), "r") do ds
