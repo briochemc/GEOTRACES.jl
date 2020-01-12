@@ -5,7 +5,7 @@ using NCDatasets, Unitful, Dates, Match
 using Measurements
 
 
-GEOTRACES_IDP17_DiscreteSamples_path() = joinpath(homedir(), "Data/GEOTRACES/GEOTRACES_IDP2017_v2 2/discrete_sample_data/netcdf/GEOTRACES_IDP2017_v2_Discrete_Sample_Data.nc")
+GEOTRACES_IDP17_DiscreteSamples_path() = get(ENV, "GEOTRACES_IDP17_PATH", joinpath(homedir(), "Data/GEOTRACES/GEOTRACES_IDP2017_v2 2/discrete_sample_data/netcdf/GEOTRACES_IDP2017_v2_Discrete_Sample_Data.nc"))
 
 include("helper_functions.jl")
 
