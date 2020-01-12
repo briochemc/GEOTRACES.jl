@@ -8,6 +8,8 @@ In order to use this software, you must first download the GEOTRACES IDP 17 data
 $HOME/Data/GEOTRACES/GEOTRACES_IDP2017_v2 2/discrete_sample_data/netcdf/GEOTRACES_IDP2017_v2_Discrete_Sample_Data.nc
 ```
 
+You can configure this path by setting the `GEOTRACES_IDP2017_PATH` environment variable to point to the location **of the NetCDF file**.
+
 (You should be able to do `$ echo $HOME` in the terminal to find out where `$HOME` is.)
 
 The GEOTRACES data management committee does not allow third party distribution of its data and does not provide a public URL pointing directly to the data.
