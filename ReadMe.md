@@ -10,8 +10,6 @@ $HOME/Data/GEOTRACES/GEOTRACES_IDP2017_v2 2/discrete_sample_data/netcdf/GEOTRACE
 
 You can configure this path by setting the `GEOTRACES_IDP2017_PATH` environment variable to point to the location **of the NetCDF file**.
 
-(You should be able to do `$ echo $HOME` in the terminal to find out where `$HOME` is.)
-
 The GEOTRACES data management committee does not allow third party distribution of its data and does not provide a public URL pointing directly to the data.
 However **the GEOTRACES datasets are publicly accessible, but must be *manually* downloaded**.
 (This goes against core principles of open science, but the author of the GEOTRACES.jl package respects the decision of the many contributors that have agreed on these limitations.)

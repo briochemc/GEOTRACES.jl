@@ -121,6 +121,38 @@ function observations(ds::Dataset, tracer::String)
 end
 
 """
+    qualitycontrols(tracer1, tracer2, tracer3, ...)
+
+Returns the GEOTRACES quality control flag of the given tracers.
+
+GEOTRACES's `Char`s are converted to `Int` by this function.
+
+From GEOTRACES:
+```
+1 = good quality
+2 = not evaluated, not available or unknown quality
+3 = questionable/suspect quality
+4 = bad quality
+9 = missing data
+```
+
+Note that there should be no `9` because `missing` data is skipped
+by the `observations` function.
+"""
+function qualitycontrols(ds::Dataset, tracers::String...)
+    vs = ((ds[varname(tracer)][:] for tracer in tracers)...,)
+    ikeep = findall(i -> !any(ismissing.(getindex.(vs, i))), eachindex(vs[1]))
+    qcvs = ((ds[qcvarname(tracer)].var[:] for tracer in tracers)...,)
+    return ((parse.(Int, view(qcv, ikeep)) for qcv in qcvs)...,)
+end
+function qualitycontrols(ds::Dataset, tracer::String)
+    v = ds[varname(tracer)][:]
+    ikeep = findall(!ismissing, v)
+    qcv = ds[qcvarname(tracer)].var[:]
+    return parse.(Int, view(qcv, ikeep))
+end
+
+"""
     metadata(tracer1, tracer2, tracer3, ...)
 
 Returns the GEOTRACES metadata for given tracers.
@@ -167,7 +199,7 @@ end
 
 # open and close ds if not provided
 for f in [:observations, :metadata, :transect, :transects, :list_of_cruises,
-         :list_of_stations, :CruiseTrack, :variable,
+         :list_of_stations, :CruiseTrack, :variable, :qualitycontrols,
          :standarddeviations, :matchingvariables, :observations_with_std]
     @eval begin
         $f(args...; kwargs...) =
