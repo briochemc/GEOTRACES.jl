@@ -29,11 +29,6 @@ function matchingvariables(ds::Dataset, str::String)
     return [p for p in dictionary(ds) if occursin(Regex(str, "i"), p[2])]
 end
 
-function tracervariable(ds::Dataset, tracer::String)
-    vars = varbyattrib(ds, long_name="$(tracer)_D_CONC_BOTTLE")
-    return length(vars) > 1 ? error("duplicate tracers. This is a bug") : vars[1]
-end
-
 variable(ds::Dataset, tracer::String) = println(ds[varname(tracer)])
 
 # Special treatment for metadata

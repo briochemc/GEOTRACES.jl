@@ -44,7 +44,7 @@ transect(tracer::String, cruise::String)
 The `Transect` of observations of tracer `tracer` along cruise `cruise`.
 """
 function transect(ds::Dataset, tracer::String, cruise::String)
-    var = tracervariable(ds, tracer)
+    var = ds[varname(tracer)]
     Istations = findall(list_of_cruises(ds) .== cruise)
     f = unitfunction(var.attrib["units"])
     profiles = DepthProfile{typeof(f(one(eltype(var.var))))}[]
@@ -69,7 +69,7 @@ transects(tracer::String, cruise::String)
 The `Transects` of observations of tracer `tracer`.
 """
 function transects(ds::Dataset, tracer::String)
-    var = tracervariable(ds, tracer)
+    var = ds[varname(tracer)]
     f = unitfunction(var.attrib["units"])
     ts = Transect{typeof(f(one(eltype(var.var))))}[]
     cs = String[]
@@ -106,17 +106,30 @@ Returns the GEOTRACES observations of the given tracers.
 x, y, z, ... = observations(tracer1, tracer2, tracer3, ...)
 x = observations(tracer1)
 ```
+
+### Quality control flags
+
+By default, only observations with quality control flag of `1` are kept.
+If you want more data, you must define keyword-argument `QCmax`.
+
+```
+x, y, z, ... = observations(tracer1, tracer2, tracer3, ...; QCmax = 2)
+x = observations(tracer1; QCmax = 3)
+```
+
 """
-function observations(ds::Dataset, tracers::String...)
+function observations(ds::Dataset, tracers::String...; QCmax=1)
     fs = ((unitfunction(ds[varname(tracer)].attrib["units"]) for tracer in tracers)...,)
     vs = ((ds[varname(tracer)][:] for tracer in tracers)...,)
-    ikeep = findall(i -> !any(ismissing.(getindex.(vs, i))), eachindex(vs[1]))
+    qcvs = ((ds[qcvarname(tracer)].var[:] for tracer in tracers)...,)
+    ikeep = findall(i -> all((parse.(Int, getindex.(qcvs, i))) .≤ QCmax), eachindex(qcvs[1]))
     return ((f.(float.(view(v, ikeep))) for (f,v) in zip(fs,vs))...,)
 end
-function observations(ds::Dataset, tracer::String)
+function observations(ds::Dataset, tracer::String; QCmax=1)
     f = unitfunction(ds[varname(tracer)].attrib["units"])
     v = ds[varname(tracer)][:]
-    ikeep = findall(!ismissing, v)
+    qcv = ds[qcvarname(tracer)].var[:]
+    ikeep = findall(parse.(Int, qcv) .≤ QCmax)
     return f.(float.(view(v, ikeep)))
 end
 
@@ -157,10 +170,10 @@ end
 
 Returns the GEOTRACES metadata for given tracers.
 """
-function metadata(ds::Dataset, tracers::String...; metadatakeys=("latitude", "longitude", "depth"))
-    vs = ((ds[varname(tracer)][:] for tracer in tracers)...,)
-    ikeep = findall(i -> !any(ismissing.(getindex.(vs, i))), eachindex(vs[1]))
-    ikeep = CartesianIndices(size(vs[1]))[ikeep]
+function metadata(ds::Dataset, tracers::String...; metadatakeys=("latitude", "longitude", "depth"), QCmax=1)
+    qcvs = ((ds[qcvarname(tracer)].var[:] for tracer in tracers)...,)
+    ikeep = findall(i -> all((parse.(Int, getindex.(qcvs, i))) .≤ QCmax), eachindex(qcvs[1]))
+    ikeep = CartesianIndices(size(qcvs[1]))[ikeep]
     GEOTRACESmetadatakeys = varname.(metadatakeys)
     metadata = [metadatakeyvaluepair(ds[k], ikeep) for k in GEOTRACESmetadatakeys]
     namedmetadata = (; metadata...)
