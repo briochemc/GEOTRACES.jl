@@ -181,7 +181,7 @@ end
 
 Returns the GEOTRACES metadata for given tracers.
 """
-function metadata(ds::Dataset, tracers::String...; metadatakeys=("latitude", "longitude", "depth"), QCmax=1)
+function metadata(ds::Dataset, tracers::String...; metadatakeys=("lat", "lon", "depth"), QCmax=1)
     qcvs = ((ds[qcvarname(tracer)].var[:] for tracer in tracers)...,)
     ikeep = findall(i -> all((parse.(Int, getindex.(qcvs, i))) .≤ QCmax), eachindex(qcvs[1]))
     ikeep = CartesianIndices(size(qcvs[1]))[ikeep]
