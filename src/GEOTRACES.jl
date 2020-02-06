@@ -3,6 +3,7 @@ module GEOTRACES
 using OceanographyCruises
 using NCDatasets, Unitful, Dates, Match
 using Measurements
+using MetadataArrays
 
 
 GEOTRACES_IDP17_DiscreteSamples_path() = get(ENV, "GEOTRACES_IDP17_PATH", joinpath(homedir(), "Data/GEOTRACES/GEOTRACES_IDP2017_v2 2/discrete_sample_data/netcdf/GEOTRACES_IDP2017_v2_Discrete_Sample_Data.nc"))
@@ -118,19 +119,29 @@ x = observations(tracer1; QCmax = 3)
 ```
 
 """
-function observations(ds::Dataset, tracers::String...; QCmax=1)
-    fs = ((unitfunction(ds[varname(tracer)].attrib["units"]) for tracer in tracers)...,)
-    vs = ((ds[varname(tracer)][:] for tracer in tracers)...,)
-    qcvs = ((ds[qcvarname(tracer)].var[:] for tracer in tracers)...,)
+function observations(ds::Dataset, tracers::String...; metadatakeys=("lat", "lon", "depth"), QCmax=1)
+    vars = [ds[varname(tracer)] for tracer in tracers]
+    fs = [unitfunction(var.attrib["units"]) for var in vars]
+    vs = [var[:] for var in vars]
+    qcvs = [ds[qcvarname(tracer)].var[:] for tracer in tracers]
     ikeep = findall(i -> all((parse.(Int, getindex.(qcvs, i))) .≤ QCmax), eachindex(qcvs[1]))
-    return ((f.(float.(view(v, ikeep))) for (f,v) in zip(fs,vs))...,)
+    ikeep = CartesianIndices(size(qcvs[1]))[ikeep]
+    GEOTRACESmetadatakeys = varname.(metadatakeys)
+    metadata = [metadatakeyvaluepair(ds[k], ikeep) for k in GEOTRACESmetadatakeys]
+    ms = [(name="Observed $t", GEOTRACESvarname=name(var), metadata...) for (t,var) in zip(tracers,vars)]
+    return ((MetadataVector(f.(float.(view(v, ikeep))), m) for (f,v,m) in zip(fs,vs,ms))...,)
 end
-function observations(ds::Dataset, tracer::String; QCmax=1)
+function observations(ds::Dataset, tracer::String; metadatakeys=("lat", "lon", "depth"), QCmax=1)
     f = unitfunction(ds[varname(tracer)].attrib["units"])
-    v = ds[varname(tracer)][:]
+    var = ds[varname(tracer)]
+    v = var[:]
     qcv = ds[qcvarname(tracer)].var[:]
     ikeep = findall(parse.(Int, qcv) .≤ QCmax)
-    return f.(float.(view(v, ikeep)))
+    ikeep = CartesianIndices(size(qcv))[ikeep]
+    GEOTRACESmetadatakeys = varname.(metadatakeys)
+    metadata = [metadatakeyvaluepair(ds[k], ikeep) for k in GEOTRACESmetadatakeys]
+    metadata = (name="Observed $(tracer)", GEOTRACESvarname=name(var), metadata...)
+    return MetadataVector(f.(float.(view(v, ikeep))), metadata)
 end
 
 """
