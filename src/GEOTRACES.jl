@@ -223,7 +223,7 @@ end
 
 # open and close ds if not provided
 for f in [:observations, :metadata, :transect, :transects, :list_of_cruises,
-         :list_of_stations, :CruiseTrack, :variable, :qualitycontrols,
+         :list_of_stations, :variable, :qualitycontrols,
          :standarddeviations, :matchingvariables, :observations_with_std]
     @eval begin
         $f(args...; kwargs...) =
