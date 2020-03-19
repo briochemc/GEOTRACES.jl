@@ -1,7 +1,7 @@
 name = "GEOTRACES"
 uuid = "0fd43d8d-f157-424e-aaf7-32776c24e0de"
 authors = ["Benoit Pasquier <pasquieb@uci.edu>"]
-version = "0.1.1"
+version = "0.1.2"
 
 [deps]
 Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
@@ -16,9 +16,7 @@ Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
 Match = "1"
 Measurements = "2"
 MetadataArrays = "0.1"
-NCDatasets = "0.9"
+NCDatasets = "0.9, 0.10"
 OceanographyCruises = "0.1"
 Unitful = "1"
 julia = "1"
-
-

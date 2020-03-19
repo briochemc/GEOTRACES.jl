@@ -5,7 +5,7 @@ A package for reading and using GEOTRACES data in Julia.
 In order to use this software, you must first download the GEOTRACES IDP 17 data as a NetCDF file and place it in a `Data` directory in your local "home" directory. That is, the path for the NetCDF file should be:
 
 ```
-$HOME/Data/GEOTRACES/GEOTRACES_IDP2017_v2 2/discrete_sample_data/netcdf/GEOTRACES_IDP2017_v2_Discrete_Sample_Data.nc
+$HOME/Data/GEOTRACES/GEOTRACES_IDP2017_v2/discrete_sample_data/netcdf/GEOTRACES_IDP2017_v2_Discrete_Sample_Data.nc
 ```
 
 You can configure this path by setting the `GEOTRACES_IDP2017_PATH` environment variable to point to the location **of the NetCDF file**.
@@ -84,7 +84,7 @@ List of things you might want to extract from GEOTRACES data:
 
     ```julia
     julia> MD = metadata("Cd", metadatakeys=("lat", "date")) ; # just (lat, date)
-    
+
     julia> MD.DateTime
     7108-element Array{Dates.DateTime,1}:
      2011-03-05T19:28:00
@@ -128,4 +128,3 @@ List of things you might want to extract from GEOTRACES data:
 - Deal with uncertainty on a transect or profile/station basis, by taking the maximum of the available std, the minimum observed diff, the last significant digit?
 - plotting recipes mimicing Ocean Data View
 - figure out a way to CI despite the GEOTRACES data-access restrictions
-
