@@ -83,7 +83,7 @@ function transects(obs::MetadataArray, tracer::String)
             (station isa Char) && (station = string(station)) # Because sometimes it's a Char...
             push!(profiles, DepthProfile(station = Station(name=station, lat=lat, lon=lon, date=date), depths=ustrip.(m.depth[ipro]), values=parent(obs)[ipro]))
         end
-        push!(ts, sort(Transect(tracer=m.name, cruise=cruise, profiles=profiles)))
+        push!(ts, Transect(tracer=m.name, cruise=cruise, profiles=profiles))
     end
     return Transects(tracer=tracer, cruises=cruises, transects=ts)
 end

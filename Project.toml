@@ -1,6 +1,6 @@
 name = "GEOTRACES"
 uuid = "0fd43d8d-f157-424e-aaf7-32776c24e0de"
-authors = ["Benoit Pasquier <pasquieb@uci.edu>"]
+authors = ["Benoit Pasquier <briochemc@gmail.com>"]
 version = "0.1.2"
 
 [deps]
