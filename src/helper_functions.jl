@@ -69,6 +69,7 @@ varname(tracer::String) = @match lowercase(tracer) begin
     "cd" || "cadmium"                                                     => "var70"
     "fe" || "iron" || "dissolved iron" || "dfe"                           => "var73"
     "ni" || "nickel"                                                      => "var83"
+    "nd" || "neodymium"                                                   => "var94"
     "δcd" || "δ¹¹⁰cd" || "δ110cd" || "δcadmium"                           => "var116"
     "δfe" || "δ⁵⁴fe" || "δ54fe" || "δiron"                                => "var117"
     _ => tracer
