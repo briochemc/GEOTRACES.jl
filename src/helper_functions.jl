@@ -111,7 +111,6 @@ qcvarname(tracer::String) = string(varname(tracer), "_QC")
 # TODO add units
 # - cell
 # - TU
-# - pertenthousand
 unitfunction(str::String) = @match str begin
     "degrees_east"                       => identity
     "degrees_north"                      => identity
@@ -125,7 +124,7 @@ unitfunction(str::String) = @match str begin
     "umol/kg"                            => x -> x * u"μmol/kg"
     "per mil"                            => x -> x * u"permille"
     "TU"                                 => x -> x * 0.118u"Bq/L"
-    "per 10000"                          => x -> x * 0.1u"permille"
+    "per 10000"                          => x -> x * u"pertenthousand"
     "uBq/kg"                             => x -> x * u"μBq/kg"
     "mBq/kg"                             => x -> x * u"mBq/kg"
     "atoms/kg"                           => x -> x * u"1/kg"

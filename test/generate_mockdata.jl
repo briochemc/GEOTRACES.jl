@@ -1,6 +1,22 @@
 using NCDatasets
 
-ds = Dataset("GEOTRACES_mockdata.nc","c")
+using Random
+rng = MersenneTwister(1234)
+
+# Create mock data in a temporary directory
+mockdir = mktempdir(homedir())
+mockdata_path = joinpath(mockdir, "GEOTRACES_mockdata.nc")
+ENV["GEOTRACES_IDP17_PATH"] = mockdata_path 
+
+ds = Dataset(mockdata_path, "c")
+
+# The following was generated using something like below
+# (Giving up on making this reproducible because of GEOTRACES own agreements/rules.)
+#=
+mockdir = mktempdir(homedir())
+ncfile = GEOTRACES.GEOTRACES_IDP17_DiscreteSamples_path()
+ncgen(ncfile, joinpath(mockdir, "mockdata.jl"))
+=#
 
 # Dimensions
 
@@ -54,7 +70,7 @@ ncvar1.attrib["_FillValue"] = Float32(-1.0e10)
 ncvar1_QC = defVar(ds,"var1_QC", Char, ("N_SAMPLES", "N_STATIONS"))
 ncvar1_QC.attrib["Conventions"] = "IODE - IODE data quality codes"
 ncvar1_QC.attrib["comment"] = "1: good quality, 2: not evaluated, not available or unknown quality, 3: questionable/suspect quality, 4: bad quality, 9: missing data"
-ncvar1_QC.attrib["_FillValue"] = "9"
+ncvar1_QC.attrib["_FillValue"] = '9'
 
 ncvar2 = defVar(ds,"var2", Float32, ("N_SAMPLES", "N_STATIONS"))
 ncvar2.attrib["long_name"] = "DEPTH"
@@ -67,7 +83,7 @@ ncvar2.attrib["_FillValue"] = Float32(-1.0e10)
 ncvar2_QC = defVar(ds,"var2_QC", Char, ("N_SAMPLES", "N_STATIONS"))
 ncvar2_QC.attrib["Conventions"] = "IODE - IODE data quality codes"
 ncvar2_QC.attrib["comment"] = "1: good quality, 2: not evaluated, not available or unknown quality, 3: questionable/suspect quality, 4: bad quality, 9: missing data"
-ncvar2_QC.attrib["_FillValue"] = "9"
+ncvar2_QC.attrib["_FillValue"] = '9'
 
 
 
@@ -82,7 +98,7 @@ ncvar7.attrib["_FillValue"] = Float32(-1.0e10)
 ncvar7_QC = defVar(ds,"var7_QC", Char, ("N_SAMPLES", "N_STATIONS"))
 ncvar7_QC.attrib["Conventions"] = "IODE - IODE data quality codes"
 ncvar7_QC.attrib["comment"] = "1: good quality, 2: not evaluated, not available or unknown quality, 3: questionable/suspect quality, 4: bad quality, 9: missing data"
-ncvar7_QC.attrib["_FillValue"] = "9"
+ncvar7_QC.attrib["_FillValue"] = '9'
 
 ncvar8 = defVar(ds,"var8", Float32, ("N_SAMPLES", "N_STATIONS"))
 ncvar8.attrib["long_name"] = "CTDSAL"
@@ -94,7 +110,7 @@ ncvar8.attrib["_FillValue"] = Float32(-1.0e10)
 ncvar8_QC = defVar(ds,"var8_QC", Char, ("N_SAMPLES", "N_STATIONS"))
 ncvar8_QC.attrib["Conventions"] = "IODE - IODE data quality codes"
 ncvar8_QC.attrib["comment"] = "1: good quality, 2: not evaluated, not available or unknown quality, 3: questionable/suspect quality, 4: bad quality, 9: missing data"
-ncvar8_QC.attrib["_FillValue"] = "9"
+ncvar8_QC.attrib["_FillValue"] = '9'
 
 ncvar14 = defVar(ds,"var14", Float32, ("N_SAMPLES", "N_STATIONS"))
 ncvar14.attrib["long_name"] = "He_D_CONC_BOTTLE"
@@ -107,7 +123,7 @@ ncvar14.attrib["_FillValue"] = Float32(-1.0e10)
 ncvar14_QC = defVar(ds,"var14_QC", Char, ("N_SAMPLES", "N_STATIONS"))
 ncvar14_QC.attrib["Conventions"] = "IODE - IODE data quality codes"
 ncvar14_QC.attrib["comment"] = "1: good quality, 2: not evaluated, not available or unknown quality, 3: questionable/suspect quality, 4: bad quality, 9: missing data"
-ncvar14_QC.attrib["_FillValue"] = "9"
+ncvar14_QC.attrib["_FillValue"] = '9'
 
 ncvar14_STD = defVar(ds,"var14_STD", Float32, ("N_SAMPLES", "N_STATIONS"))
 ncvar14_STD.attrib["long_name"] = "Standard deviation of He_D_CONC_BOTTLE"
@@ -130,7 +146,7 @@ ncvar19.attrib["_FillValue"] = Float32(-1.0e10)
 ncvar19_QC = defVar(ds,"var19_QC", Char, ("N_SAMPLES", "N_STATIONS"))
 ncvar19_QC.attrib["Conventions"] = "IODE - IODE data quality codes"
 ncvar19_QC.attrib["comment"] = "1: good quality, 2: not evaluated, not available or unknown quality, 3: questionable/suspect quality, 4: bad quality, 9: missing data"
-ncvar19_QC.attrib["_FillValue"] = "9"
+ncvar19_QC.attrib["_FillValue"] = '9'
 
 
 ncvar21 = defVar(ds,"var21", Float32, ("N_SAMPLES", "N_STATIONS"))
@@ -144,7 +160,7 @@ ncvar21.attrib["_FillValue"] = Float32(-1.0e10)
 ncvar21_QC = defVar(ds,"var21_QC", Char, ("N_SAMPLES", "N_STATIONS"))
 ncvar21_QC.attrib["Conventions"] = "IODE - IODE data quality codes"
 ncvar21_QC.attrib["comment"] = "1: good quality, 2: not evaluated, not available or unknown quality, 3: questionable/suspect quality, 4: bad quality, 9: missing data"
-ncvar21_QC.attrib["_FillValue"] = "9"
+ncvar21_QC.attrib["_FillValue"] = '9'
 
 
 ncvar23 = defVar(ds,"var23", Float32, ("N_SAMPLES", "N_STATIONS"))
@@ -158,7 +174,7 @@ ncvar23.attrib["_FillValue"] = Float32(-1.0e10)
 ncvar23_QC = defVar(ds,"var23_QC", Char, ("N_SAMPLES", "N_STATIONS"))
 ncvar23_QC.attrib["Conventions"] = "IODE - IODE data quality codes"
 ncvar23_QC.attrib["comment"] = "1: good quality, 2: not evaluated, not available or unknown quality, 3: questionable/suspect quality, 4: bad quality, 9: missing data"
-ncvar23_QC.attrib["_FillValue"] = "9"
+ncvar23_QC.attrib["_FillValue"] = '9'
 
 ncvar23_STD = defVar(ds,"var23_STD", Float32, ("N_SAMPLES", "N_STATIONS"))
 ncvar23_STD.attrib["long_name"] = "Standard deviation of SILICATE_D_CONC_BOTTLE"
@@ -179,7 +195,7 @@ ncvar24.attrib["_FillValue"] = Float32(-1.0e10)
 ncvar24_QC = defVar(ds,"var24_QC", Char, ("N_SAMPLES", "N_STATIONS"))
 ncvar24_QC.attrib["Conventions"] = "IODE - IODE data quality codes"
 ncvar24_QC.attrib["comment"] = "1: good quality, 2: not evaluated, not available or unknown quality, 3: questionable/suspect quality, 4: bad quality, 9: missing data"
-ncvar24_QC.attrib["_FillValue"] = "9"
+ncvar24_QC.attrib["_FillValue"] = '9'
 
 ncvar24_STD = defVar(ds,"var24_STD", Float32, ("N_SAMPLES", "N_STATIONS"))
 ncvar24_STD.attrib["long_name"] = "Standard deviation of NITRATE_D_CONC_BOTTLE"
@@ -201,7 +217,7 @@ ncvar70.attrib["_FillValue"] = Float32(-1.0e10)
 ncvar70_QC = defVar(ds,"var70_QC", Char, ("N_SAMPLES", "N_STATIONS"))
 ncvar70_QC.attrib["Conventions"] = "IODE - IODE data quality codes"
 ncvar70_QC.attrib["comment"] = "1: good quality, 2: not evaluated, not available or unknown quality, 3: questionable/suspect quality, 4: bad quality, 9: missing data"
-ncvar70_QC.attrib["_FillValue"] = "9"
+ncvar70_QC.attrib["_FillValue"] = '9'
 
 ncvar70_STD = defVar(ds,"var70_STD", Float32, ("N_SAMPLES", "N_STATIONS"))
 ncvar70_STD.attrib["long_name"] = "Standard deviation of Cd_D_CONC_BOTTLE"
@@ -223,7 +239,7 @@ ncvar73.attrib["_FillValue"] = Float32(-1.0e10)
 ncvar73_QC = defVar(ds,"var73_QC", Char, ("N_SAMPLES", "N_STATIONS"))
 ncvar73_QC.attrib["Conventions"] = "IODE - IODE data quality codes"
 ncvar73_QC.attrib["comment"] = "1: good quality, 2: not evaluated, not available or unknown quality, 3: questionable/suspect quality, 4: bad quality, 9: missing data"
-ncvar73_QC.attrib["_FillValue"] = "9"
+ncvar73_QC.attrib["_FillValue"] = '9'
 
 ncvar73_STD = defVar(ds,"var73_STD", Float32, ("N_SAMPLES", "N_STATIONS"))
 ncvar73_STD.attrib["long_name"] = "Standard deviation of Fe_D_CONC_BOTTLE"
@@ -245,7 +261,7 @@ ncvar83.attrib["_FillValue"] = Float32(-1.0e10)
 ncvar83_QC = defVar(ds,"var83_QC", Char, ("N_SAMPLES", "N_STATIONS"))
 ncvar83_QC.attrib["Conventions"] = "IODE - IODE data quality codes"
 ncvar83_QC.attrib["comment"] = "1: good quality, 2: not evaluated, not available or unknown quality, 3: questionable/suspect quality, 4: bad quality, 9: missing data"
-ncvar83_QC.attrib["_FillValue"] = "9"
+ncvar83_QC.attrib["_FillValue"] = '9'
 
 ncvar83_STD = defVar(ds,"var83_STD", Float32, ("N_SAMPLES", "N_STATIONS"))
 ncvar83_STD.attrib["long_name"] = "Standard deviation of Ni_D_CONC_BOTTLE"
@@ -267,7 +283,7 @@ ncvar116.attrib["_FillValue"] = Float32(-1.0e10)
 ncvar116_QC = defVar(ds,"var116_QC", Char, ("N_SAMPLES", "N_STATIONS"))
 ncvar116_QC.attrib["Conventions"] = "IODE - IODE data quality codes"
 ncvar116_QC.attrib["comment"] = "1: good quality, 2: not evaluated, not available or unknown quality, 3: questionable/suspect quality, 4: bad quality, 9: missing data"
-ncvar116_QC.attrib["_FillValue"] = "9"
+ncvar116_QC.attrib["_FillValue"] = '9'
 
 ncvar116_STD = defVar(ds,"var116_STD", Float32, ("N_SAMPLES", "N_STATIONS"))
 ncvar116_STD.attrib["long_name"] = "Standard deviation of Cd_114_110_D_DELTA_BOTTLE"
@@ -288,7 +304,7 @@ ncvar117.attrib["_FillValue"] = Float32(-1.0e10)
 ncvar117_QC = defVar(ds,"var117_QC", Char, ("N_SAMPLES", "N_STATIONS"))
 ncvar117_QC.attrib["Conventions"] = "IODE - IODE data quality codes"
 ncvar117_QC.attrib["comment"] = "1: good quality, 2: not evaluated, not available or unknown quality, 3: questionable/suspect quality, 4: bad quality, 9: missing data"
-ncvar117_QC.attrib["_FillValue"] = "9"
+ncvar117_QC.attrib["_FillValue"] = '9'
 
 ncvar117_STD = defVar(ds,"var117_STD", Float32, ("N_SAMPLES", "N_STATIONS"))
 ncvar117_STD.attrib["long_name"] = "Standard deviation of Fe_56_54_D_DELTA_BOTTLE"
@@ -329,12 +345,38 @@ for i in 1:1866
         ncmetavar2[j,i] = j≤length(s) ? s[j] : '\0'
     end
 end
+# depth indices where there is pressure (~4% of the data) (could not used depth as one of them profiles is weird)
+idx = [
+       23, 239, 47, 23, 47, 23, 23, 23, 23, 23, 23, 71, 23, 239, 23, 71, 23, 71, 23, 71, 23, 263, 23, 71, 23, 71, 141, 23, 23, 69, 23, 23, 287, 23, 71, 23, 71, 23, 287, 23, 71, 23, 71, 23, 239, 23, 23, 23, 23, 71, 23, 23, 23, 71, 12, 13, 47, 23, 23, 23, 167, 95, 23, 71, 187, 23, 23, 23, 71, 261, 23, 71, 23, 23, 23, 23, 23, 237, 71, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 47, 23, 108, 98, 47, 47, 47, 47, 47,
+       52, 74, 68, 47, 51, 49, 47, 47, 47, 95, 68, 74, 47, 47, 53, 50, 23, 47, 119, 68, 47, 47, 74, 47, 47, 47, 47, 101, 47, 49, 47, 47, 47, 47, 47, 47, 125, 47, 47, 47, 47, 47, 119, 47, 47, 47, 47, 47, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 38, 134, 0, 100, 37, 175, 0, 101, 52, 37, 101, 124, 174, 37, 37, 100, 0, 172, 100, 0, 36, 0, 218, 100, 101, 101, 98, 121, 36, 36, 0, 37, 12, 36, 0, 0, 196, 100, 0, 145, 36, 0, 1, 169, 101, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 49, 71, 47, 27, 72, 6, 47, 71, 47, 11, 47, 46, 7, 71, 47, 50, 72, 21, 47, 47, 7, 47, 71, 27, 1, 47, 71, 23, 47, 71, 47, 19, 71, 23, 47, 1, 72, 19, 18, 47,
+       42, 23, 46, 6, 47, 48, 47, 47, 23, 59, 47, 44, 23, 46, 47, 46, 51, 18, 46, 47, 47, 26, 48, 24, 25, 14, 47, 47, 23, 47, 35, 35, 36, 35, 23, 15, 3, 11, 17, 17, 17, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 23, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 23, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 23, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 38, 35, 28, 11, 47, 47, 12, 1, 23, 47, 71, 23, 23, 47, 47, 47, 46, 47, 47, 47, 47, 47, 47, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 71, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 71, 24, 0, 0, 0, 0, 0, 0, 2, 96, 95, 0, 0, 0, 0, 0, 0, 0, 0, 0, 23, 0, 0, 23, 0, 0, 47, 71, 0, 0, 0, 0, 23, 0, 0, 71, 0, 0, 0, 0, 47, 0, 0, 0, 71, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 88, 0, 0, 23, 0, 0, 0, 47, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 47, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 35, 0, 29, 71, 23, 23, 23, 24, 71, 37, 85, 89, 71, 71, 71,
+       0, 0, 0, 0, 71, 23, 51, 95, 71, 143, 92, 41, 29, 71, 71, 70, 71, 101, 56, 104, 100, 52, 79, 154, 23, 116, 132, 76, 22, 133, 0, 0, 0, 0, 0, 0, 21, 9, 21, 21, 21, 10, 21, 10, 19, 21, 21, 10, 24, 10, 21, 10, 21, 10, 10, 8, 10, 10, 7, 10, 21, 10, 21, 0, 5, 0, 0, 5, 0, 5, 22, 22, 25, 28, 12, 12, 26, 27, 30, 22, 20, 14, 23, 30, 23, 23, 24, 22, 35, 23, 23, 21, 23, 29, 23, 15, 23, 23, 23, 15, 35, 23, 23, 23, 23, 35, 23, 15, 35, 23, 23, 27, 23, 23, 23, 14, 35, 23, 23, 23, 23, 17, 35, 23, 23, 23, 23, 18, 35, 23, 17, 47, 88, 23, 697, 63, 579, 23, 23, 88, 88, 23, 88, 23, 23, 23, 23, 505, 23, 33, 63, 71, 47, 64, 88, 21, 13, 13, 12, 14, 18, 20, 21, 21, 21, 21, 53, 21, 21, 21, 20, 21,
+       21, 149, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 53, 21, 21, 158, 21, 21, 21, 21, 21, 21, 74, 21, 21, 53, 21, 21, 21, 160, 21, 21, 21, 75, 21, 21, 21, 21, 53, 23, 21, 21, 21, 160, 21, 21, 43, 21, 21, 21, 21, 18, 18, 75, 21, 21, 21, 21, 21, 164, 23, 0, 45, 94, 43, 23, 116, 2, 21, 23, 42, 1, 23, 0, 21, 113, 1, 21, 23, 2, 21, 23, 1, 43, 23, 1, 21, 21, 1, 21, 23, 1, 21, 138, 21, 2, 21, 23, 1, 21, 23, 1, 21, 45, 1, 21, 23, 0, 21, 23, 0, 21, 45, 1, 21, 1, 22, 21, 1, 65, 21, 21, 0, 97, 0, 23, 0, 21, 0, 45, 0, 21, 0, 21, 0, 21, 21, 45, 21, 140, 21, 21, 21, 21, 0, 21, 43, 23, 21, 21, 21, 45, 21, 162, 21, 21, 21, 21, 0, 67, 21, 0, 21, 21, 45, 45, 21, 0, 21, 21, 21, 21, 69,
+       21, 45, 21, 21, 21, 69, 21, 21, 17, 21, 45, 53, 45, 0, 18, 14, 44, 21, 21, 21, 96, 0, 21, 21, 21, 21, 21, 96, 21, 45, 21, 21, 140, 21, 21, 143, 21, 21, 21, 23, 144, 45, 32, 14, 17, 20, 21, 20, 0, 23, 23, 23, 35, 23, 23, 35, 23, 23, 23, 35, 23, 23, 30, 21, 23, 30, 23, 30, 23, 23, 32, 23, 32, 23, 23, 32, 23, 32, 23, 23, 32, 23, 32, 23, 32, 23, 23, 32, 23, 32, 23, 23, 32, 23, 23, 23, 32, 23, 23, 32, 23, 23, 32, 23, 23, 32, 23, 32, 23, 23, 32, 23, 23, 32, 23, 32, 23, 32, 23, 32, 23, 32, 47, 48, 10, 9, 10, 23, 11, 10, 8, 91, 69, 9, 62, 16, 24, 48, 23, 23, 97, 23, 25, 24, 121, 25, 24, 25, 96, 23, 25, 16, 25, 24, 24, 20, 12, 97, 24, 23, 135, 13, 11, 11, 18, 15, 25, 12, 15, 23, 17, 24, 23, 21, 20, 24, 25, 21, 23, 23, 24, 22, 121, 23, 24, 22, 25, 23, 23, 121, 48, 24, 20, 24, 15, 23, 19, 18, 24, 23,
+       24, 169, 23, 25, 24, 73, 22, 121, 20, 20, 49, 20, 71, 25, 23, 48, 15, 16, 25, 23, 24, 23, 23, 25, 23, 24, 25, 23, 94, 20, 23, 24, 21, 17, 22, 121, 23, 23, 10, 7, 8, 9, 73, 7, 24, 7, 87, 2, 5, 8, 7, 6, 5, 6, 4, 4, 4, 5, 3, 3, 3, 2, 3, 4, 3, 3, 4, 2, 3, 2, 3, 4, 5, 4, 4, 4, 3, 2, 7, 6, 6, 5, 3, 3, 5, 3, 3, 4, 3, 3, 3, 3, 3, 1, 3, 7, 4, 1, 4, 0, 1, 3, 2, 3, 2, 0, 0, 2, 2, 0, 2, 21, 65, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 131, 263, 35, 21, 87, 21, 21, 21, 21, 21, 43, 153, 263, 21, 153, 21, 20, 241, 153, 263, 21, 175, 21, 21, 8, 7, 47, 40, 46, 53, 51, 64, 48, 59, 43, 52, 57, 58, 42, 32, 24, 40, 24, 24, 24, 9, 32, 28, 30, 8, 26, 29, 16, 28, 25, 20, 26, 29, 42, 28, 29, 28, 27, 28, 16, 28, 44, 20, 28, 29, 28, 32, 17, 28, 20, 31, 28, 32, 26, 32, 32, 26, 20, 44, 11, 11, 11, 11, 11, 11, 23, 15, 58, 43, 81, 59, 58, 35, 59, 79, 64,
+       56, 58, 59, 47, 58, 89, 58, 58, 55, 90, 58, 81, 43, 96, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 234, 70, 59, 80, 97, 37, 146, 37, 142, 37, 215, 37, 143, 37, 168, 37, 137, 239, 11, 137, 137, 37, 143, 37, 136, 216, 37, 137, 37, 144, 37, 142, 37, 86, 37, 230, 30, 33, 72, 81, 36, 36, 36, 70, 33, 78, 36, 74, 75, 32, 36, 36, 25, 25, 11, 11, 16, 17, 11, 11, 11, 7, 6, 7, 5, 6, 0, 5, 6, 7, 6, 3, 38, 28, 47, 13, 10, 11, 41, 37, 19, 36, 35, 34, 12, 33, 12, 0, 11, 0, 0, 5, 0, 0, 0, 0, 1, 11, 1, 0, 0, 0, 2, 0, 0, 2, 0, 2, 0, 0, 11, 4, 0, 0, 26, 30, 29, 8, 11, 11, 11, 11, 11, 11, 11, 23, 9, 11, 11, 10, 11, 13, 0, 11, 0, 16, 0, 16, 13, 13, 15, 17, 14, 4, 2, 4, 10, 14, 4, 6, 22, 25, 19, 34, 10, 20, 10, 9, 19, 2, 2, 2, 2, 16, 11]
+function myfill(v)
+    out = fill(fillvalue(v.var), size(v)...)
+    for i in eachindex(idx)
+        out[1:idx[i], i] .= rand(rng, eltype(v.var), idx[i])
+    end
+    out
+end
+function myfill_QC(v)
+    out = Array{Char,2}(undef, size(v)...)
+    out .= '9'
+    for i in eachindex(idx)
+        out[1:idx[i], i] .= rand(rng, QC, idx[i])
+    end
+    out
+end
 # random lat lon date
 nclongitude[:] = rand(eltype(nclongitude.var), size(nclongitude)...)
 nclatitude[:] = rand(eltype(nclatitude.var), size(nclatitude)...)
 ncdate_time[:] = rand(eltype(ncdate_time.var), size(ncdate_time)...)
 # QC characters 1:5
-QC = [s[1] for s in string.(1:5)]
+QC = [s[1] for s in string.([1,2,3,4,5])]
 # pressure
 ncvar1[:] = rand(eltype(ncvar1.var), size(ncvar1)...)
 ncvar1_QC[:] = rand(QC, size(ncvar1_QC)...)
@@ -348,43 +390,11 @@ ncvar7_QC[:] = rand(QC, size(ncvar7_QC)...)
 ncvar8[:] = rand(eltype(ncvar8.var), size(ncvar8)...)
 ncvar8_QC[:] = rand(QC, size(ncvar8_QC)...)
 # some tracers
-# He
-ncvar14[:] = rand(eltype(ncvar14.var), size(ncvar14)...)
-ncvar14_QC[:] = rand(QC, size(ncvar14_QC)...)
-ncvar14_STD[:] = rand(eltype(ncvar14_STD.var), size(ncvar14_STD)...)
-# O2
-ncvar19[:] = rand(eltype(ncvar19.var), size(ncvar19)...)
-ncvar19_QC[:] = rand(QC, size(ncvar19_QC)...)
-# PO4
-ncvar21[:] = rand(eltype(ncvar21.var), size(ncvar21)...)
-ncvar21_QC[:] = rand(QC, size(ncvar21_QC)...)
-# NO3
-ncvar23[:] = rand(eltype(ncvar23.var), size(ncvar23)...)
-ncvar23_QC[:] = rand(QC, size(ncvar23_QC)...)
-ncvar23_STD[:] = rand(eltype(ncvar23_STD.var), size(ncvar23_STD)...)
-# SiOH4
-ncvar24[:] = rand(eltype(ncvar24.var), size(ncvar24)...)
-ncvar24_QC[:] = rand(QC, size(ncvar24_QC)...)
-ncvar24_STD[:] = rand(eltype(ncvar24_STD.var), size(ncvar24_STD)...)
-# Cd
-ncvar70[:] = rand(eltype(ncvar70.var), size(ncvar70)...)
-ncvar70_QC[:] = rand(QC, size(ncvar70_QC)...)
-ncvar70_STD[:] = rand(eltype(ncvar70_STD.var), size(ncvar70_STD)...)
-# Fe
-ncvar73[:] = rand(eltype(ncvar73.var), size(ncvar73)...)
-ncvar73_QC[:] = rand(QC, size(ncvar73_QC)...)
-ncvar73_STD[:] = rand(eltype(ncvar73_STD.var), size(ncvar73_STD)...)
-# Ni
-ncvar83[:] = rand(eltype(ncvar83.var), size(ncvar83)...)
-ncvar83_QC[:] = rand(QC, size(ncvar83_QC)...)
-ncvar83_STD[:] = rand(eltype(ncvar83_STD.var), size(ncvar83_STD)...)
-# δCd
-ncvar116[:] = rand(eltype(ncvar116.var), size(ncvar116)...)
-ncvar116_QC[:] = rand(QC, size(ncvar116_QC)...)
-ncvar116_STD[:] = rand(eltype(ncvar116_STD.var), size(ncvar116_STD)...)
-# δFe
-ncvar117[:] = rand(eltype(ncvar117.var), size(ncvar117)...)
-ncvar117_QC[:] = rand(QC, size(ncvar117_QC)...)
-ncvar117_STD[:] = rand(eltype(ncvar117_STD.var), size(ncvar117_STD)...)
+for v in [ncvar14, ncvar14_STD, ncvar19, ncvar21, ncvar23, ncvar23_STD, ncvar24, ncvar24_STD, ncvar70, ncvar70_STD, ncvar73, ncvar73_STD, ncvar83, ncvar83_STD, ncvar116, ncvar116_STD, ncvar117, ncvar117_STD]
+    v[:] = myfill(v)
+end
+for v in [ncvar14_QC, ncvar19_QC, ncvar21_QC, ncvar23_QC, ncvar24_QC, ncvar70_QC, ncvar73_QC, ncvar83_QC, ncvar116_QC, ncvar117_QC]
+    v[:] = myfill_QC(v)
+end
 
- close(ds)
+close(ds)

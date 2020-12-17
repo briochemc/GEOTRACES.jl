@@ -1,7 +1,10 @@
 module GEOTRACES
 
 using OceanographyCruises
-using NCDatasets, Unitful, Dates, Match
+using NCDatasets
+using Unitful
+using Dates
+using Match
 using Measurements
 using MetadataArrays
 import MetadataArrays: metadata
