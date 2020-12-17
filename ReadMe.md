@@ -17,29 +17,38 @@ A package for reading and using GEOTRACES data in Julia.
   </a>
 </p>
 
-In order to use this software, you must first download the GEOTRACES IDP 17 data as a NetCDF file and place it in a `Data` directory in your local "home" directory. That is, the path for the NetCDF file should be:
+> ***Important notes***
 
-```
-$HOME/Data/GEOTRACES/GEOTRACES_IDP2017_v2/discrete_sample_data/netcdf/GEOTRACES_IDP2017_v2_Discrete_Sample_Data.nc
-```
+> In order to use this software, you must first download the GEOTRACES IDP 17 data as a NetCDF file and place it in a `Data` directory in your local "home" directory. That is, the path for the NetCDF file should be:
 
-You can configure this path by setting the `GEOTRACES_IDP2017_PATH` environment variable to point to the location **of the NetCDF file**.
+> ```
+> $HOME/Data/GEOTRACES/GEOTRACES_IDP2017_v2/discrete_sample_data/netcdf/GEOTRACES_IDP2017_v2_Discrete_Sample_Data.nc
+> ```
 
-The GEOTRACES data management committee does not allow third party distribution of its data and does not provide a public URL pointing directly to the data.
-However **the GEOTRACES datasets are publicly accessible, but must be *manually* downloaded**.
+> Alternatively, you can configure this path by setting the `GEOTRACES_IDP2017_PATH` environment variable to point to the location **of the NetCDF file**.
+
+> The GEOTRACES data management committee does not allow third party distribution of its data and does not provide a public URL pointing directly to the data.
+> However **the GEOTRACES datasets are publicly accessible, but must be *manually* downloaded**.
 (This goes against core principles of open science, but I respect the decision of the many contributors that have agreed on these limitations.)
 
+To use this package, like every other registered Julia package, you must add it to your environment, and then
 
+```julia
+julia> using GEOTRACES
+```
+
+should work.
 
 ### Tools
 
 List of things you might want to extract from GEOTRACES data:
 
-- Most GEOTRACES variable names are not explicit (e.g., `var70` for Cadmium).
+- Most GEOTRACES variable names are not very explicit (e.g., `var70` for Cadmium).
     For this reason, GEOTRACES.jl provides shortcut names for common tracers/variables.
     To check which variable they correspond to, you can do (taking Cadmium as an example)
+
     ```julia
-    julia> variable("Cd")
+    julia> GEOTRACES.variable("Cd")
     var70 (698 × 1866)
       Datatype:    Float32
       Dimensions:  N_SAMPLES × N_STATIONS
@@ -57,24 +66,24 @@ List of things you might want to extract from GEOTRACES data:
 - A vector of the concentrations of a tracer, e.g., Cadmium, with units (using [Unitful.jl](https://github.com/PainterQubits/Unitful.jl)), with missing values skipped, is returned by:
 
     ```julia
-    julia> Cd = observations("Cd")
-    7108-element Array{Quantity{Float32,𝐍*𝐌^-1,Unitful.FreeUnits{(kg^-1, nmol),𝐍*𝐌^-1,nothing}},1}:
-     0.0528f0 nmol kg^-1
-     0.0697f0 nmol kg^-1
-     0.1557f0 nmol kg^-1
-                       ⋮
-     1.0396f0 nmol kg^-1
-     1.0376f0 nmol kg^-1
-     1.0307f0 nmol kg^-1
+    julia> Cd = GEOTRACES.observations("Cd")
+    6935-element MetadataArrays.MetadataArray{Unitful.Quantity{Float32,𝐍 𝐌⁻¹,Unitful.FreeUnits{(kg⁻¹, nmol),𝐍 𝐌⁻¹,nothing}},1,NamedTuple{(:name, :GEOTRACESvarname, :lat, :lon, :depth),Tuple{String,String,Array{Float32,1},Array{Float32,1},Array{Unitful.Quantity{Float32,𝐋,Unitful.FreeUnits{(m,),𝐋,nothing}},1}}},Array{Unitful.Quantity{Float32,𝐍 𝐌⁻¹,Unitful.FreeUnits{(kg⁻¹, nmol),𝐍 𝐌⁻¹,nothing}},1}}:
+     0.0528f0 nmol kg⁻¹
+     0.0697f0 nmol kg⁻¹
+     0.1557f0 nmol kg⁻¹
+                      ⋮
+     1.0396f0 nmol kg⁻¹
+     1.0376f0 nmol kg⁻¹
+     1.0307f0 nmol kg⁻¹
     ```
 
 - To get the corresponding metadata of that tracer's observations, like location, date, etc., one can do
 
     ```julia
-    julia> MD = metadata("Cd") ; # a (lat, lon, depth) named tuple
+    julia> MD = Cd.metadata ; # a named tuple with lat, lon, depth, and more...
 
-    julia> MD.Depth
-    7108-element Array{Quantity{Float32,𝐋,Unitful.FreeUnits{(m,),𝐋,nothing}},1}:
+    julia> MD.depth
+    6935-element Array{Unitful.Quantity{Float32,𝐋,Unitful.FreeUnits{(m,),𝐋,nothing}},1}:
        10.0f0 m
        25.0f0 m
        51.0f0 m
@@ -83,8 +92,8 @@ List of things you might want to extract from GEOTRACES data:
      1198.0f0 m
      1300.0f0 m
 
-    julia> MD.Latitude
-    7108-element Array{Float32,1}:
+    julia> MD.lat
+    6935-element Array{Float32,1}:
      -49.5472
      -49.5472
      -49.5472
@@ -94,52 +103,31 @@ List of things you might want to extract from GEOTRACES data:
       48.65
     ```
 
-    The default is `(lat, lon, depth)` but you can also specify which metadata you want with the `metadatakeys` keyword with a tuple of the metadata names (shortcuts like `"lat"` and `"lon"` provided).
-    For example, `MD` below contains latitude and date information of where/when Cadmium was observed:
+    The default metadata contains latitude, longitude, and depth,
 
     ```julia
-    julia> MD = metadata("Cd", metadatakeys=("lat", "date")) ; # just (lat, date)
+    julia> keys(MD)
+    (:name, :GEOTRACESvarname, :lat, :lon, :depth)
+    ```
+    but you could also have specified which metadata you wanted using the `metadatakeys` keyword:
 
-    julia> MD.DateTime
-    7108-element Array{Dates.DateTime,1}:
-     2011-03-05T19:28:00
-     2011-03-05T19:28:00
-     2011-03-05T19:28:00
-     ⋮
-     2012-08-17T00:18:42
-     2012-08-17T00:18:42
-     2012-08-17T00:18:42
+    ```julia
+    julia> Cd2 = GEOTRACES.observations("Cd", metadatakeys=("lat", "lon")); keys(Cd2.metadata)
+    (:name, :GEOTRACESvarname, :lat, :lon) # <- no depth field
     ```
 
 - Data organized into cruise transects and profiles using the [OceanographyCruises.jl](https://github.com/briochemc/OceanographyCruises.jl) package
 
     ```julia
-    Cd_transects = transects("Cd")
-    Cd_transect = transects("Cd", "GA02")
+    julia> Cd_transects = GEOTRACES.transects("Cd")
+    Transects of Cd
+    (Cruises GA02, GA03, GA04, GA10, GA11, GI04, GIPY01, GIPY02, GIPY04, GIPY05, GIPY06, GIPY13, GP02, GP13, GP16, GP18, GPpr01, GPpr02, and GPpr07.)
     ```
 
-- GEOTRACES variables sometimes come with a standard deviation, in which case you can use
+- Sometimes you want to extract data for two or more tracers but *only where/when these are observed simultaneously*. GEOTRACES does the filtering for you if you ask for them in the same call:
 
     ```julia
-    Cd_std = standarddeviations("Cd") # STD if it exists
-    Cd = observations_with_std("Cd")  # Cd ± Cd_std (using Measurments.jl)
+    julia> Cd, PO₄, DFe = GEOTRACES.observations("Cd", "PO₄", "DFe") # Cd, PO₄, and DFe obs with units
+    (Unitful.Quantity{Float32,𝐍 𝐌⁻¹,Unitful.FreeUnits{(kg⁻¹, nmol),𝐍 𝐌⁻¹,nothing}}[0.0528f0 nmol kg⁻¹, 0.0697f0 nmol kg⁻¹, 0.1557f0 nmol kg⁻¹, 0.3743f0 nmol kg⁻¹, 0.4684f0 nmol kg⁻¹, 0.533f0 nmol kg⁻¹, 0.5569f0 nmol kg⁻¹, 0.6011f0 nmol kg⁻¹, 0.6586f0 nmol kg⁻¹, 0.7084f0 nmol kg⁻¹  …  0.7873171f0 nmol kg⁻¹, 0.8044f0 nmol kg⁻¹, 0.7717073f0 nmol kg⁻¹, 0.7809f0 nmol kg⁻¹, 0.74536586f0 nmol kg⁻¹, 0.7665f0 nmol kg⁻¹, 0.7336f0 nmol kg⁻¹, 0.7464f0 nmol kg⁻¹, 0.7295f0 nmol kg⁻¹, 0.7203122f0 nmol kg⁻¹], Unitful.Quantity{Float32,𝐍 𝐌⁻¹,Unitful.FreeUnits{(kg⁻¹, μmol),𝐍 𝐌⁻¹,nothing}}[1.01f0 μmol kg⁻¹, 2.37f0 μmol kg⁻¹, 2.34f0 μmol kg⁻¹, 2.29f0 μmol kg⁻¹, 2.25f0 μmol kg⁻¹, 2.23f0 μmol kg⁻¹, 2.21f0 μmol kg⁻¹, 1.01f0 μmol kg⁻¹, 1.11f0 μmol kg⁻¹, 1.46f0 μmol kg⁻¹  …  2.56f0 μmol kg⁻¹, 2.55f0 μmol kg⁻¹, 2.5f0 μmol kg⁻¹, 2.48f0 μmol kg⁻¹, 2.42f0 μmol kg⁻¹, 2.35f0 μmol kg⁻¹, 2.33f0 μmol kg⁻¹, 2.32f0 μmol kg⁻¹, 2.32f0 μmol kg⁻¹, 2.31f0 μmol kg⁻¹], Unitful.Quantity{Float32,𝐍 𝐌⁻¹,Unitful.FreeUnits{(kg⁻¹, nmol),𝐍 𝐌⁻¹,nothing}}[0.52f0 nmol kg⁻¹, 0.37f0 nmol kg⁻¹, 0.43f0 nmol kg⁻¹, 0.35f0 nmol kg⁻¹, 0.31f0 nmol kg⁻¹, 0.36f0 nmol kg⁻¹, 0.41f0 nmol kg⁻¹, 0.44f0 nmol kg⁻¹, 0.64f0 nmol kg⁻¹, 0.75f0 nmol kg⁻¹  …  0.6087805f0 nmol kg⁻¹, 0.66097564f0 nmol kg⁻¹, 0.6707317f0 nmol kg⁻¹, 0.5721951f0 nmol kg⁻¹, 0.50731707f0 nmol kg⁻¹, 0.4878049f0 nmol kg⁻¹, 0.46341464f0 nmol kg⁻¹, 0.4497561f0 nmol kg⁻¹, 0.44f0 nmol kg⁻¹, 0.48292682f0 nmol kg⁻¹])
     ```
 
-    > **Note**: we do not recommend it at this stage because a most of the GEOTRACES data comes with no quantification of uncertainty.
-
-- Sometimes you want to extract data for two or more tracers. So you might want them only where/when these are observed simultaneously.
-
-    ```julia
-    Cd, PO₄, DFe = observations("Cd", "PO₄", "DFe") # Cd, PO₄, and DFe obs with units
-    MD = metadata("Cd", "PO₄", "DFe")          # a (lat, lon, depth) NTuple
-    MD = metadata("Cd", "PO₄", "DFe", metadatakeys=("lat", "lon", "depth")) # same as above
-    MD = metadata("Cd", "PO₄", "DFe", metadatakeys=("lat", "date"))         # just (lat, date)
-    Cd_std, PO₄_std = standarddeviations("Cd", "PO₄") # STD if they exist
-    Cd, PO₄ = observations_with_std("Cd", "PO₄")      # Cd ± Cd_std, PO₄ ± PO₄_std
-    ```
-
-## TODO
-
-- Deal with uncertainty on a transect or profile/station basis, by taking the maximum of the available std, the minimum observed diff, the last significant digit?
-- plotting recipes mimicing Ocean Data View
-- figure out a way to CI despite the GEOTRACES data-access restrictions
