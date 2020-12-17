@@ -18,18 +18,18 @@ A package for reading and using GEOTRACES data in Julia.
 </p>
 
 > ***Important notes***
-
+>
 > In order to use this software, you must first download the GEOTRACES IDP 17 data as a NetCDF file and place it in a `Data` directory in your local "home" directory. That is, the path for the NetCDF file should be:
-
+>
 > ```
 > $HOME/Data/GEOTRACES/GEOTRACES_IDP2017_v2/discrete_sample_data/netcdf/GEOTRACES_IDP2017_v2_Discrete_Sample_Data.nc
 > ```
-
+>
 > Alternatively, you can configure this path by setting the `GEOTRACES_IDP2017_PATH` environment variable to point to the location **of the NetCDF file**.
-
+>
 > The GEOTRACES data management committee does not allow third party distribution of its data and does not provide a public URL pointing directly to the data.
 > However **the GEOTRACES datasets are publicly accessible, but must be *manually* downloaded**.
-(This goes against core principles of open science, but I respect the decision of the many contributors that have agreed on these limitations.)
+> (This goes against core principles of open science, but I respect the decision of the many contributors that have agreed on these limitations.)
 
 To use this package, like every other registered Julia package, you must add it to your environment, and then
 
