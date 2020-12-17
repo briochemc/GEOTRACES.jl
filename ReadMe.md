@@ -2,6 +2,21 @@
 
 A package for reading and using GEOTRACES data in Julia.
 
+<p>
+  <a href="https://github.com/briochemc/GEOTRACES.jl/actions">
+    <img src="https://img.shields.io/github/workflow/status/briochemc/GEOTRACES.jl/Mac%20OS%20X?label=OSX&logo=Apple&logoColor=white&style=flat-square">
+  </a>
+  <a href="https://github.com/briochemc/GEOTRACES.jl/actions">
+    <img src="https://img.shields.io/github/workflow/status/briochemc/GEOTRACES.jl/Linux?label=Linux&logo=Linux&logoColor=white&style=flat-square">
+  </a>
+  <a href="https://github.com/briochemc/GEOTRACES.jl/actions">
+    <img src="https://img.shields.io/github/workflow/status/briochemc/GEOTRACES.jl/Windows?label=Windows&logo=Windows&logoColor=white&style=flat-square">
+  </a>
+  <a href="https://codecov.io/gh/briochemc/GEOTRACES.jl">
+    <img src="https://img.shields.io/codecov/c/github/briochemc/GEOTRACES.jl/master?label=Codecov&logo=codecov&logoColor=white&style=flat-square">
+  </a>
+</p>
+
 In order to use this software, you must first download the GEOTRACES IDP 17 data as a NetCDF file and place it in a `Data` directory in your local "home" directory. That is, the path for the NetCDF file should be:
 
 ```
