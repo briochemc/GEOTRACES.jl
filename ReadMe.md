@@ -39,7 +39,7 @@ A package for reading and using GEOTRACES data in Julia.
 > However **the GEOTRACES datasets are publicly accessible, but must be *manually* downloaded**.
 > (This goes against core principles of open science, but I respect the decision of the many contributors that have agreed on these limitations.)
 
-To use this package, like every other registered Julia package, you must add it to your environment, and then
+To use this package, like every other registered Julia package, you must [add it to your environment](https://julialang.github.io/Pkg.jl/v1/managing-packages/#Adding-registered-packages), and then
 
 ```julia
 julia> using GEOTRACES
