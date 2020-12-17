@@ -1,6 +1,6 @@
 # GEOTRACES.jl
 
-A package for reading and using GEOTRACES data in Julia.
+A package for reading and using [GEOTRACES](https://www.geotraces.org/) data in Julia.
 
 <p>
   <a href="https://github.com/briochemc/GEOTRACES.jl/actions">
