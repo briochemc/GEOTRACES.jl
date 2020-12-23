@@ -46,7 +46,7 @@ julia> using GEOTRACES
 
 should work.
 
-### Tools
+### What this package does
 
 List of things you might want to extract from GEOTRACES data:
 
