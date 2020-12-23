@@ -35,9 +35,8 @@ A package for reading and using [GEOTRACES](https://www.geotraces.org/) data in 
 > ENV["GEOTRACES_IDP2017_PATH"] = <path_to_your_GEOTRACES_data>
 > ```
 >
-> The GEOTRACES data management committee does not allow third party distribution of its data and does not provide a public URL pointing directly to the data.
-> However **the GEOTRACES datasets are publicly accessible, but must be *manually* downloaded**.
-> (This goes against core principles of open science, but I respect the decision of the many contributors that have agreed on these limitations.)
+> The GEOTRACES data management committee does not allow third party distribution of its data and does not provide a public URL pointing directly to the data, which prevents this package from downloading the data for you.
+> However, **the GEOTRACES data are publicly accessible, but they *must be manually downloaded***.
 
 To use this package, like every other registered Julia package, you must [add it to your environment](https://julialang.github.io/Pkg.jl/v1/managing-packages/#Adding-registered-packages), and then
 
