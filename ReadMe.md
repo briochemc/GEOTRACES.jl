@@ -48,8 +48,6 @@ should work.
 
 ### What this package does
 
-List of things you might want to extract from GEOTRACES data:
-
 - Most GEOTRACES variable names are not very explicit (e.g., `var70` for Cadmium).
     For this reason, GEOTRACES.jl provides shortcut names for common tracers/variables.
     To check which variable they correspond to, you can do (taking Cadmium as an example)
@@ -67,8 +65,10 @@ List of things you might want to extract from GEOTRACES data:
        FORTRAN_format       = F12.3
        _FillValue           = -1.0e10
     ```
-    These shortcuts are matched to the GEOTRACES variable names in the `varname` function.
-    PRs or suggestions to add new shortcut names are welcome!
+    At this stage, only a few variables have a predefined shortcut (those I have used myself).
+    But suggestions to add new shortcut names are more than welcome! Just start an issue to ask for it on the repository and I'll try to respond ASAP!
+    (PRs even better — check the `varname` function for the current list of predefined shortcuts.)
+    
 
 - A vector of the concentrations of a tracer, e.g., Cadmium, with units (using [Unitful.jl](https://github.com/PainterQubits/Unitful.jl)), with missing values skipped, is returned by:
 
