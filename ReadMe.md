@@ -17,11 +17,11 @@ A package for reading and using [GEOTRACES](https://www.geotraces.org/) data in 
   </a>
 </p>
 
-> ***Important notes***
+> ***Important note***
 >
 > In order to use this software, you must first download the GEOTRACES IDP 17 data as a NetCDF file.
 >
-> I would recommend that you place it in a `Data` directory in your local "home" directory. 
+> I would recommend that you place it in a `Data` directory in your local "home" directory.
 > For example, on OSX, the path of my GEOTRACES NetCDF file is:
 >
 > ```
@@ -35,7 +35,7 @@ A package for reading and using [GEOTRACES](https://www.geotraces.org/) data in 
 > ENV["GEOTRACES_IDP2017_PATH"] = <path_to_your_GEOTRACES_data>
 > ```
 >
-> The GEOTRACES data management committee does not allow third party distribution of its data and does not provide a public URL pointing directly to the data, which prevents this package from downloading the data for you.
+> The GEOTRACES data management committee does not allow third-party distribution of its data and does not provide a public URL pointing directly to the data, which prevents this package from downloading the data for you.
 > However, **the GEOTRACES data are publicly accessible, but they *must be manually downloaded***.
 
 To use this package, like every other registered Julia package, you must [add it to your environment](https://julialang.github.io/Pkg.jl/v1/managing-packages/#Adding-registered-packages), and then
@@ -47,6 +47,8 @@ julia> using GEOTRACES
 should work.
 
 ### What this package does
+
+Simply put, this package helps you read and use GEOTRACES data in Julia.
 
 - Most GEOTRACES variable names are not very explicit (e.g., `var70` for Cadmium).
     For this reason, GEOTRACES.jl provides shortcut names for common tracers/variables.
@@ -68,7 +70,7 @@ should work.
     At this stage, only a few variables have a predefined shortcut (those I have used myself).
     But suggestions to add new shortcut names are more than welcome! Just start an issue to ask for it on the repository and I'll try to respond ASAP!
     (PRs even better — check the `varname` function for the current list of predefined shortcuts.)
-    
+
 
 - For those variables with a predefined shortcut name, you can get the vector of the concentrations with units (using [Unitful.jl](https://github.com/PainterQubits/Unitful.jl)) with the `GEOTRACES.observations` function:
 
@@ -122,7 +124,7 @@ should work.
     julia> Cd2 = GEOTRACES.observations("Cd", metadatakeys=("lat", "lon")); keys(Cd2.metadata)
     (:name, :GEOTRACESvarname, :lat, :lon) # <- no depth field
     ```
-    
+
 - Sometimes, you want to extract data for two or more tracers but *only where/when these are observed simultaneously*. GEOTRACES does the filtering for you if you ask for them in the same call:
 
     ```julia
@@ -137,8 +139,8 @@ should work.
     Transects of Cd
     (Cruises GA02, GA03, GA04, GA10, GA11, GI04, GIPY01, GIPY02, GIPY04, GIPY05, GIPY06, GIPY13, GP02, GP13, GP16, GP18, GPpr01, GPpr02, and GPpr07.)
     ```
-    
-    to access all the transects that have Cadmium concentrations, and explore the data transect by transect, you can append `.transects` and chose a cruise, e.g., 
+
+    to access all the transects that have Cadmium concentrations, and explore the data transect by transect, you can append `.transects` and chose a cruise, e.g.,
 
     ```julia
     julia> Cd_GA02 = Cd.transects[1]
@@ -157,9 +159,9 @@ should work.
     │    ⋮    │          ⋮          │          ⋮          │         ⋮          │
     └─────────┴─────────────────────┴─────────────────────┴────────────────────┘
     ```
-    
+
     which contains all the profiles of the GA02 cruise. You can further explore profiles by appending `.profiles` and selecting a profile, e.g.,
-    
+
     ```julia
     julia> Cd_GA02_profile1 = Cd_GA02.profiles[1]
     Depth profile at Station 001 2011-03-05T19:28:00 (49.5S, 307.3E)
@@ -178,7 +180,7 @@ should work.
     ```
 
     Finally, you can access the vectors of concentration values (with units!) and depths by appending `.values` and `.depths`:
-    
+
     ```julia
     julia> Cd_GA02_profile1.values
     24-element Array{Unitful.Quantity{Float32,𝐍 𝐌⁻¹,Unitful.FreeUnits{(kg⁻¹, nmol),𝐍 𝐌⁻¹,nothing}},1}:
@@ -189,7 +191,7 @@ should work.
      0.6946f0 nmol kg⁻¹
      0.6997f0 nmol kg⁻¹
      0.7067f0 nmol kg⁻¹
-    
+
     julia> Cd_GA02_profile1.depths
     24-element Array{Float64,1}:
        10.0
@@ -200,5 +202,5 @@ should work.
      2248.0
      2312.0
      ```
-     
+
 I hope you find this tool useful! Suggestions and PRs welcome!
