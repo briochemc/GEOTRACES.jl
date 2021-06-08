@@ -35,7 +35,7 @@ variable(ds::Dataset, tracer::String) = println(ds[varname(tracer)])
 
 metadatakeyvaluepair(v, idx) = @match name(v) begin
     "metavar1"  => (:cruise => reduce.(string, filter.(!=('\0'), eachcol(v.var[:,:])))[[i.I[2] for i in idx]])
-    "metavar2"  => (:station => reduce.(string, filter.(!=('\0'), eachcol(v.var[:,:])))[[i.I[2] for i in idx]])
+    "metavar2"  => (:station => string.(reduce.(string, filter.(!=('\0'), eachcol(v.var[:,:])))[[i.I[2] for i in idx]]))
     "longitude" => (:lon => float.(v.var[[i.I[2] for i in idx]]))
     "latitude"  => (:lat => float.(v.var[[i.I[2] for i in idx]]))
     "var2"      => (:depth => unitfunction(v.attrib["units"]).(float.(v.var[idx])))
