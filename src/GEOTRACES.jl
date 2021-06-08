@@ -6,9 +6,10 @@ using Unitful
 using Dates
 using Match
 using Measurements
-using MetadataArrays
-import MetadataArrays: metadata
+using DataFrames
+using Metadata
 
+const metadatakeys=("lat", "lon", "depth", "cruise", "station", "date") # default
 
 GEOTRACES_IDP17_DiscreteSamples_path() = get(ENV, "GEOTRACES_IDP17_PATH", joinpath(homedir(), "Data/GEOTRACES/GEOTRACES_IDP2017_v2/discrete_sample_data/netcdf/GEOTRACES_IDP2017_v2_Discrete_Sample_Data.nc"))
 
@@ -65,35 +66,23 @@ transects(tracer::String, cruise::String)
 
 The `Transects` of observations of tracer `tracer`.
 """
+function transects(obs::DataFrame, tracer::String)
+    ts = Transect{eltype(getproperty(obs, tracer))}[]
+    df_bycruise = groupby(obs, :cruise)
+    for (cruise, cruise_df) in pairs(df_bycruise)
+        df_byprofile = groupby(cruise_df, [:lat, :lon, :station, :date])
+        profiles = [DepthProfile(station = Station(name=string(k.station), lat=k.lat, lon=k.lon, date=k.date), 
+                                 depths=ustrip.(v.depth), 
+                                 values=v[:,tracer]) for (k,v) in pairs(df_byprofile)]
+        push!(ts, Transect(tracer=tracer, cruise=cruise.cruise, profiles=profiles))
+    end
+    return Transects(tracer=tracer, cruises=[k.cruise for k in keys(df_bycruise)], transects=ts)
+end
 function transects(ds::Dataset, tracer::String; QCmax=1)
-    obs = observations(ds, tracer; metadatakeys=("lat","lon","depth","cruise","station","date"), QCmax=QCmax)
+    obs = observations(ds, tracer; metadatakeys, QCmax)
     return transects(obs, tracer)
 end
-function transects(obs::MetadataArray, tracer::String)
-    m = metadata(obs)
-    cruises = unique(m.cruise)
-    ts = Transect{eltype(parent(obs))}[]
-    for cruise in cruises
-        icruise = findall(m.cruise .== cruise)
-        IDs = unique([x for x in zip(m.station[icruise], m.date[icruise], m.lat[icruise], m.lon[icruise])])
-        IDstations = unique(m.station[icruise])
-        IDdates = unique(m.date[icruise])
-        IDlatlons = unique([x for x in zip(m.lat[icruise], m.lon[icruise])])
-        profiles = DepthProfile{eltype(parent(obs))}[]
-        for sdll in IDs # ID is sdll = (station, date, lat, lon)
-            station, date, lat, lon = sdll
-            ipro = findall((m.station .== station) .& (m.lat .== lat) .& (m.lon .== lon) .& (m.date .== date))
-            (station isa Char) && (station = string(station)) # Because sometimes it's a Char...
-            push!(profiles, DepthProfile(station = Station(name=station, lat=lat, lon=lon, date=date), depths=ustrip.(m.depth[ipro]), values=parent(obs)[ipro]))
-        end
-        push!(ts, Transect(tracer=m.name, cruise=cruise, profiles=profiles))
-    end
-    return Transects(tracer=tracer, cruises=cruises, transects=ts)
-end
-function transects(ds::Dataset, tracers::String...; QCmax=1)
-    obss = observations(ds, tracers...; metadatakeys=("lat","lon","depth","cruise","station","date"), QCmax=QCmax)
-    return ([transects(obs, tracer) for (obs, tracer) in zip(obss, tracers)]...,)
-end
+
 
 
 #function cruisetrack(ds::Dataset, cruise::String)
@@ -132,19 +121,11 @@ x, y, z, ... = observations(tracer1, tracer2, tracer3, ...; QCmax = 2)
 x = observations(tracer1; QCmax = 3)
 ```
 """
-function observations(ds::Dataset, tracers::String...; metadatakeys=("lat", "lon", "depth"), QCmax=1)
-    vars = [ds[varname(tracer)] for tracer in tracers]
-    fs = [unitfunction(var.attrib["units"]) for var in vars]
-    vs = [var[:] for var in vars]
-    qcvs = [ds[qcvarname(tracer)].var[:] for tracer in tracers]
-    ikeep = findall(i -> all((parse.(Int, getindex.(qcvs, i))) .≤ QCmax), eachindex(qcvs[1]))
-    ikeep = CartesianIndices(size(qcvs[1]))[ikeep]
-    GEOTRACESmetadatakeys = varname.(metadatakeys)
-    metadata = [metadatakeyvaluepair(ds[k], ikeep) for k in GEOTRACESmetadatakeys]
-    ms = [(name="Observed $t", GEOTRACESvarname=name(var), metadata...) for (t,var) in zip(tracers,vars)]
-    return ((MetadataVector(f.(float.(view(v, ikeep))), m) for (f,v,m) in zip(fs,vs,ms))...,)
+function observations(ds::Dataset, tracers::String...; metadatakeys=metadatakeys, QCmax=1)
+    dfs = (observations(ds, tracer; metadatakeys, QCmax) for tracer in tracers) 
+    return innerjoin(dfs..., on=collect(metadatakeys))
 end
-function observations(ds::Dataset, tracer::String; metadatakeys=("lat", "lon", "depth"), QCmax=1)
+function observations(ds::Dataset, tracer::String; metadatakeys=metadatakeys, QCmax=1)
     f = unitfunction(ds[varname(tracer)].attrib["units"])
     var = ds[varname(tracer)]
     v = var[:]
@@ -152,9 +133,10 @@ function observations(ds::Dataset, tracer::String; metadatakeys=("lat", "lon", "
     ikeep = findall(parse.(Int, qcv) .≤ QCmax)
     ikeep = CartesianIndices(size(qcv))[ikeep]
     GEOTRACESmetadatakeys = varname.(metadatakeys)
-    metadata = [metadatakeyvaluepair(ds[k], ikeep) for k in GEOTRACESmetadatakeys]
-    metadata = (name="Observed $(tracer)", GEOTRACESvarname=name(var), metadata...)
-    return MetadataVector(f.(float.(view(v, ikeep))), metadata)
+    metadata = (metadatakeyvaluepair(ds[k], ikeep) for k in GEOTRACESmetadatakeys)
+    df = DataFrame(metadata..., Symbol(tracer)=>f.(float.(view(v, ikeep))))
+    #mdf = attach_metadata(df, (GEOTRACESvarname=name(var),))
+    return df
 end
 
 """
