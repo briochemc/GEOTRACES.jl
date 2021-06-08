@@ -7,7 +7,6 @@ using Dates
 using Match
 using Measurements
 using DataFrames
-using Metadata
 
 const metadatakeys=("lat", "lon", "depth", "cruise", "station", "date") # default
 
