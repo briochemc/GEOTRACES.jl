@@ -6,7 +6,7 @@ using Test
 using GEOTRACES
 using Unitful
 using OceanographyCruises
-using MetadataArrays
+using DataFrames
 
 
 #@testset "Test dummy cruise" begin
@@ -28,21 +28,16 @@ end
 @testset "observations" begin
     @testset "$var" for var in ["Cd", "PO₄", "δCd", "Fe"]
         x = GEOTRACES.observations(var)
-        @test x isa MetadataVector
-        @test x.parent isa Vector{<:Quantity}
+        @test x isa DataFrame
+        @test getproperty(x, var) isa Vector{<:Quantity}
         x_QC = GEOTRACES.qualitycontrols(var)
         @test x_QC isa Vector{Int}
     end
     @testset "($var1, $var2)" for (var1, var2) in zip(["Cd", "PO₄"], ["δCd", "Fe"])
-        x, y = GEOTRACES.observations(var1, var2)
-        @test x isa MetadataVector
-        @test y isa MetadataVector
-        @test x.parent isa Vector{<:Quantity}
-        @test y.parent isa Vector{<:Quantity}
-        @test length(x) == length(y)
-        @test x.metadata.lon == y.metadata.lon
-        @test x.metadata.lat == y.metadata.lat
-        @test x.metadata.depth == y.metadata.depth
+        x = GEOTRACES.observations(var1, var2)
+        @test x isa DataFrame
+        @test getproperty(x, var1) isa Vector{<:Quantity}
+        @test getproperty(x, var2) isa Vector{<:Quantity}
         x_QC, y_QC = GEOTRACES.qualitycontrols(var1, var2)
         @test x_QC isa Vector{Int}
         @test y_QC isa Vector{Int}
@@ -58,7 +53,9 @@ end
         @test x isa Transect
     end
     @testset "($var1, $var2)" for (var1, var2) in zip(["Cd", "PO₄"], ["δCd", "Fe"])
-        x, y = GEOTRACES.transects(var1, var2)
+        obs = GEOTRACES.observations(var1, var2)
+        x = GEOTRACES.transects(obs, var1)
+        y = GEOTRACES.transects(obs, var2)
         @test x isa Transects
         @test y isa Transects
     end

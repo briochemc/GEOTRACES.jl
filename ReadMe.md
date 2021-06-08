@@ -72,64 +72,42 @@ Simply put, this package helps you read and use GEOTRACES data in Julia.
     (PRs even better — check the `varname` function for the current list of predefined shortcuts.)
 
 
-- For those variables with a predefined shortcut name, you can get the vector of the concentrations with units (using [Unitful.jl](https://github.com/PainterQubits/Unitful.jl)) with the `GEOTRACES.observations` function:
+- For those variables with a predefined shortcut name, you can get a table of the locations, cruise, station, date, and values (concentration of cadmium here) with units (using [Unitful.jl](https://github.com/PainterQubits/Unitful.jl)) with the `GEOTRACES.observations` function:
 
     ```julia
-    julia> Cd = GEOTRACES.observations("Cd")
-    6935-element MetadataArrays.MetadataArray{Unitful.Quantity{Float32,𝐍 𝐌⁻¹,Unitful.FreeUnits{(kg⁻¹, nmol),𝐍 𝐌⁻¹,nothing}},1,NamedTuple{(:name, :GEOTRACESvarname, :lat, :lon, :depth),Tuple{String,String,Array{Float32,1},Array{Float32,1},Array{Unitful.Quantity{Float32,𝐋,Unitful.FreeUnits{(m,),𝐋,nothing}},1}}},Array{Unitful.Quantity{Float32,𝐍 𝐌⁻¹,Unitful.FreeUnits{(kg⁻¹, nmol),𝐍 𝐌⁻¹,nothing}},1}}:
-     0.0528f0 nmol kg⁻¹
-     0.0697f0 nmol kg⁻¹
-     0.1557f0 nmol kg⁻¹
-                      ⋮
-     1.0396f0 nmol kg⁻¹
-     1.0376f0 nmol kg⁻¹
-     1.0307f0 nmol kg⁻¹
+    julia> obs = GEOTRACES.observations("Cd")
+    6935×7 DataFrame
+      Row │ lat       lon      depth      cruise  station  date                 Cd
+          │ Float32   Float32  Quantity…  String  Any      DateTime…            Quantity…
+    ──────┼──────────────────────────────────────────────────────────────────────────────────────
+        1 │ -49.5472  307.312     10.0 m  GA02    001      2011-03-05T19:28:00  0.0528 nmol kg⁻¹
+        2 │ -49.5472  307.312     25.0 m  GA02    001      2011-03-05T19:28:00  0.0697 nmol kg⁻¹
+        3 │ -49.5472  307.312     51.0 m  GA02    001      2011-03-05T19:28:00  0.1557 nmol kg⁻¹
+      ⋮   │    ⋮         ⋮         ⋮        ⋮        ⋮              ⋮                  ⋮
+     6933 │  48.65    233.333   1101.0 m  GPpr07  P4       2012-08-17T00:18:42  1.0396 nmol kg⁻¹
+     6934 │  48.65    233.333   1198.0 m  GPpr07  P4       2012-08-17T00:18:42  1.0376 nmol kg⁻¹
+     6935 │  48.65    233.333   1300.0 m  GPpr07  P4       2012-08-17T00:18:42  1.0307 nmol kg⁻¹
+                                                                                6929 rows omitted
     ```
 
-- Although it can be used as one, this is not a standard vector, it's a `MetadataVector`, i.e., it comes with some metadata. To get the corresponding metadata of that tracer's observations, like location, date, etc., one can simply append `.metadata`:
+    > Note: In prior versions (< v2.0.0), `GEOTRACES.observations` used to return a vector with metadata. Since v2.0.0, `GEOTRACES.observations` returns tables from [DataFrames.jl](https://github.com/JuliaData/DataFrames.jl), which is quickly becoming the standard for handling tabular data in Julia.
+
+- Sometimes, you want to extract data for two or more tracers but *only where/when these are observed simultaneously*. GEOTRACES does the filtering for you if you ask for them in the same call, thanks to the `innerjoin` function from [DataFrames.jl](https://github.com/JuliaData/DataFrames.jl):
 
     ```julia
-    julia> MD = Cd.metadata ; # a named tuple with lat, lon, depth, and more...
-
-    julia> MD.depth
-    6935-element Array{Unitful.Quantity{Float32,𝐋,Unitful.FreeUnits{(m,),𝐋,nothing}},1}:
-       10.0f0 m
-       25.0f0 m
-       51.0f0 m
-              ⋮
-     1101.0f0 m
-     1198.0f0 m
-     1300.0f0 m
-
-    julia> MD.lat
-    6935-element Array{Float32,1}:
-     -49.5472
-     -49.5472
-     -49.5472
-       ⋮
-      48.65
-      48.65
-      48.65
-    ```
-
-    The default metadata contains latitude, longitude, and depth,
-
-    ```julia
-    julia> keys(MD)
-    (:name, :GEOTRACESvarname, :lat, :lon, :depth)
-    ```
-    but you could also have specified which metadata you wanted using the `metadatakeys` keyword:
-
-    ```julia
-    julia> Cd2 = GEOTRACES.observations("Cd", metadatakeys=("lat", "lon")); keys(Cd2.metadata)
-    (:name, :GEOTRACESvarname, :lat, :lon) # <- no depth field
-    ```
-
-- Sometimes, you want to extract data for two or more tracers but *only where/when these are observed simultaneously*. GEOTRACES does the filtering for you if you ask for them in the same call:
-
-    ```julia
-    julia> Cd, PO₄, DFe = GEOTRACES.observations("Cd", "PO₄", "DFe") # Cd, PO₄, and DFe obs with units
-    (Unitful.Quantity{Float32,𝐍 𝐌⁻¹,Unitful.FreeUnits{(kg⁻¹, nmol),𝐍 𝐌⁻¹,nothing}}[0.0528f0 nmol kg⁻¹, 0.0697f0 nmol kg⁻¹, 0.1557f0 nmol kg⁻¹, 0.3743f0 nmol kg⁻¹, 0.4684f0 nmol kg⁻¹, 0.533f0 nmol kg⁻¹, 0.5569f0 nmol kg⁻¹, 0.6011f0 nmol kg⁻¹, 0.6586f0 nmol kg⁻¹, 0.7084f0 nmol kg⁻¹  …  0.7873171f0 nmol kg⁻¹, 0.8044f0 nmol kg⁻¹, 0.7717073f0 nmol kg⁻¹, 0.7809f0 nmol kg⁻¹, 0.74536586f0 nmol kg⁻¹, 0.7665f0 nmol kg⁻¹, 0.7336f0 nmol kg⁻¹, 0.7464f0 nmol kg⁻¹, 0.7295f0 nmol kg⁻¹, 0.7203122f0 nmol kg⁻¹], Unitful.Quantity{Float32,𝐍 𝐌⁻¹,Unitful.FreeUnits{(kg⁻¹, μmol),𝐍 𝐌⁻¹,nothing}}[1.01f0 μmol kg⁻¹, 2.37f0 μmol kg⁻¹, 2.34f0 μmol kg⁻¹, 2.29f0 μmol kg⁻¹, 2.25f0 μmol kg⁻¹, 2.23f0 μmol kg⁻¹, 2.21f0 μmol kg⁻¹, 1.01f0 μmol kg⁻¹, 1.11f0 μmol kg⁻¹, 1.46f0 μmol kg⁻¹  …  2.56f0 μmol kg⁻¹, 2.55f0 μmol kg⁻¹, 2.5f0 μmol kg⁻¹, 2.48f0 μmol kg⁻¹, 2.42f0 μmol kg⁻¹, 2.35f0 μmol kg⁻¹, 2.33f0 μmol kg⁻¹, 2.32f0 μmol kg⁻¹, 2.32f0 μmol kg⁻¹, 2.31f0 μmol kg⁻¹], Unitful.Quantity{Float32,𝐍 𝐌⁻¹,Unitful.FreeUnits{(kg⁻¹, nmol),𝐍 𝐌⁻¹,nothing}}[0.52f0 nmol kg⁻¹, 0.37f0 nmol kg⁻¹, 0.43f0 nmol kg⁻¹, 0.35f0 nmol kg⁻¹, 0.31f0 nmol kg⁻¹, 0.36f0 nmol kg⁻¹, 0.41f0 nmol kg⁻¹, 0.44f0 nmol kg⁻¹, 0.64f0 nmol kg⁻¹, 0.75f0 nmol kg⁻¹  …  0.6087805f0 nmol kg⁻¹, 0.66097564f0 nmol kg⁻¹, 0.6707317f0 nmol kg⁻¹, 0.5721951f0 nmol kg⁻¹, 0.50731707f0 nmol kg⁻¹, 0.4878049f0 nmol kg⁻¹, 0.46341464f0 nmol kg⁻¹, 0.4497561f0 nmol kg⁻¹, 0.44f0 nmol kg⁻¹, 0.48292682f0 nmol kg⁻¹])
+    julia> obs = GEOTRACES.observations("Cd", "PO₄", "DFe") # Cd, PO₄, and DFe obs with units
+    5515×9 DataFrame
+      Row │ lat       lon      depth      cruise  station  date                 Cd                  PO₄             DFe
+          │ Float32   Float32  Quantity…  String  Any      DateTime…            Quantity…           Quantity…       Quantity…
+    ──────┼────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+        1 │ -49.5472  307.312     10.0 m  GA02    001      2011-03-05T19:28:00  0.0528 nmol kg⁻¹    1.01 μmol kg⁻¹  0.52 nmol kg⁻¹
+        2 │ -49.5472  307.312     10.0 m  GA02    001      2011-03-05T19:28:00  0.0528 nmol kg⁻¹    1.01 μmol kg⁻¹  0.52 nmol kg⁻¹
+        3 │ -49.5472  307.312     25.0 m  GA02    001      2011-03-05T19:28:00  0.0697 nmol kg⁻¹    2.37 μmol kg⁻¹  0.37 nmol kg⁻¹
+      ⋮   │    ⋮         ⋮         ⋮        ⋮        ⋮              ⋮                   ⋮                 ⋮                 ⋮
+     5513 │ -10.5005  208.0     5101.2 m  GP16    36       2013-12-17T00:02:27  0.7295 nmol kg⁻¹    2.32 μmol kg⁻¹  0.44 nmol kg⁻¹
+     5514 │ -10.5005  208.0     5125.4 m  GP16    36       2013-12-17T00:02:27  0.720312 nmol kg⁻¹  2.31 μmol kg⁻¹  0.482927 nmol kg⁻¹
+     5515 │ -10.5005  208.0     5125.4 m  GP16    36       2013-12-17T00:02:27  0.720312 nmol kg⁻¹  2.31 μmol kg⁻¹  0.482927 nmol kg⁻¹
+                                                                                                                      5509 rows omitted
     ```
 
 - Finally, eventually, you probably will want the GEOTRACES data organized into cruise transects and profiles. This is supported under the hood by the [OceanographyCruises.jl](https://github.com/briochemc/OceanographyCruises.jl) package, so that you can do
@@ -144,20 +122,21 @@ Simply put, this package helps you read and use GEOTRACES data in Julia.
 
     ```julia
     julia> Cd_GA02 = Cd.transects[1]
-    Transect of Observed Cd
+    Transect of Cd
     Cruise GA02
-    ┌─────────┬─────────────────────┬─────────────────────┬────────────────────┐
-    │ Station │                Date │                 Lat │                Lon │
-    ├─────────┼─────────────────────┼─────────────────────┼────────────────────┤
-    │     001 │ 2011-03-05T19:28:00 │  -49.54719924926758 │  307.3118896484375 │
-    │     002 │ 2010-05-02T19:36:57 │    64.0000991821289 │  325.7500915527344 │
-    │     002 │ 2011-03-06T23:17:05 │  -48.89419937133789 │  311.2652893066406 │
-    │     003 │ 2011-03-08T01:17:59 │  -46.91999816894531 │  312.8004150390625 │
-    │     003 │ 2010-05-03T21:30:00 │   62.34510040283203 │ 324.00189208984375 │
-    │     004 │ 2011-03-09T01:31:59 │   -44.7067985534668 │  314.4638977050781 │
-    │     005 │ 2011-03-10T00:58:29 │ -42.371299743652344 │  315.9742126464844 │
-    │    ⋮    │          ⋮          │          ⋮          │         ⋮          │
-    └─────────┴─────────────────────┴─────────────────────┴────────────────────┘
+    ┌─────────┬─────────────────────┬──────────┬─────────┐
+    │ Station │                Date │      Lat │     Lon │
+    ├─────────┼─────────────────────┼──────────┼─────────┤
+    │     001 │ 2011-03-05T19:28:00 │ -49.5472 │ 307.312 │
+    │     002 │ 2010-05-02T19:36:57 │  64.0001 │  325.75 │
+    │     002 │ 2011-03-06T23:17:05 │ -48.8942 │ 311.265 │
+    │     003 │ 2011-03-08T01:17:59 │   -46.92 │   312.8 │
+    │     003 │ 2010-05-03T21:30:00 │  62.3451 │ 324.002 │
+    │     004 │ 2011-03-09T01:31:59 │ -44.7068 │ 314.464 │
+    │     005 │ 2011-03-10T00:58:29 │ -42.3713 │ 315.974 │
+    │    ⋮    │          ⋮          │    ⋮     │    ⋮    │
+    └─────────┴─────────────────────┴──────────┴─────────┘
+                                           48 rows omitted
     ```
 
     which contains all the profiles of the GA02 cruise. You can further explore profiles by appending `.profiles` and selecting a profile, e.g.,
@@ -165,25 +144,26 @@ Simply put, this package helps you read and use GEOTRACES data in Julia.
     ```julia
     julia> Cd_GA02_profile1 = Cd_GA02.profiles[1]
     Depth profile at Station 001 2011-03-05T19:28:00 (49.5S, 307.3E)
-    ┌───────┬──────────────────────┐
-    │ Depth │    Value [nmol kg⁻¹] │
-    ├───────┼──────────────────────┤
-    │  10.0 │ 0.052799999713897705 │
-    │  25.0 │  0.06970000267028809 │
-    │  51.0 │  0.15569999814033508 │
-    │  74.0 │   0.3743000030517578 │
-    │ 100.0 │   0.4684000015258789 │
-    │ 151.0 │   0.5047000050544739 │
-    │ 200.0 │   0.5329999923706055 │
-    │   ⋮   │          ⋮           │
-    └───────┴──────────────────────┘
+    ┌───────┬───────────────────┐
+    │ Depth │ Value [nmol kg⁻¹] │
+    ├───────┼───────────────────┤
+    │  10.0 │            0.0528 │
+    │  25.0 │            0.0697 │
+    │  51.0 │            0.1557 │
+    │  74.0 │            0.3743 │
+    │ 100.0 │            0.4684 │
+    │ 151.0 │            0.5047 │
+    │ 200.0 │             0.533 │
+    │   ⋮   │         ⋮         │
+    └───────┴───────────────────┘
+                  17 rows omitted
     ```
 
     Finally, you can access the vectors of concentration values (with units!) and depths by appending `.values` and `.depths`:
 
     ```julia
     julia> Cd_GA02_profile1.values
-    24-element Array{Unitful.Quantity{Float32,𝐍 𝐌⁻¹,Unitful.FreeUnits{(kg⁻¹, nmol),𝐍 𝐌⁻¹,nothing}},1}:
+    24-element Vector{Unitful.Quantity{Float32, 𝐍 𝐌⁻¹, Unitful.FreeUnits{(kg⁻¹, nmol), 𝐍 𝐌⁻¹, nothing}}}:
      0.0528f0 nmol kg⁻¹
      0.0697f0 nmol kg⁻¹
      0.1557f0 nmol kg⁻¹
@@ -193,7 +173,7 @@ Simply put, this package helps you read and use GEOTRACES data in Julia.
      0.7067f0 nmol kg⁻¹
 
     julia> Cd_GA02_profile1.depths
-    24-element Array{Float64,1}:
+    24-element Vector{Float64}:
        10.0
        25.0
        51.0
