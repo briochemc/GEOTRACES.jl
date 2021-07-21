@@ -101,7 +101,7 @@ stdvarname(tracer::String) = string(varname(tracer), "_STD")
 """
     qcvarname(tracer)
 
-Returns the GEOTRACES variable name of the standard deviation of tracer `str`.
+Returns the GEOTRACES variable name of the quality control of tracer `str`.
 """
 qcvarname(tracer::String) = string(varname(tracer), "_QC")
 
