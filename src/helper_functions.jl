@@ -3,7 +3,7 @@
 
 A dictionary of the variables `name` and `long_name` attributes.
 
-Useful for development, `dictionary(ds)` allows me to provide shortcuts — and a 
+Useful for development, `dictionary(ds)` allows me to provide shortcuts — and a
 friendlier interface — for accessing GEOTRACES variables.
 """
 function dictionary(ds::Dataset)
@@ -73,6 +73,7 @@ varname(tracer::String) = @match lowercase(tracer) begin
     "ni" || "nickel"                                                      => "var83"
     "nd" || "neodymium"                                                   => "var94"
     "end" || "εnd" || "eneodymium" || "εneodymium"                        => "var105"
+    "v" || "vanadium"                                                     => "var88"
     _ => tracer
 end
 
