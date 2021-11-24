@@ -19,20 +19,13 @@ A package for reading and using [GEOTRACES](https://www.geotraces.org/) data in 
 
 > ***Important note***
 >
-> In order to use this software, you must first download the GEOTRACES IDP 17 data as a NetCDF file.
+> In order to use this software, you must first download the GEOTRACES IDP21 data as a NetCDF file.
 >
-> I would recommend that you place it in a `Data` directory in your local "home" directory.
+> You must place it in a `Data` directory in your local "home" directory.
 > For example, on OSX, the path of my GEOTRACES NetCDF file is:
 >
 > ```
-> $HOME/Data/GEOTRACES/GEOTRACES_IDP2017_v2/discrete_sample_data/netcdf/GEOTRACES_IDP2017_v2_Discrete_Sample_Data.nc
-> ```
->
-> Alternatively, you can configure this path by setting the `GEOTRACES_IDP2017_PATH` environment variable to point to the location **of the NetCDF file** you downloaded.
-> So, in your Julia code, you could do something like
->
-> ```julia
-> ENV["GEOTRACES_IDP2017_PATH"] = <path_to_your_GEOTRACES_data>
+> $HOME/Data/GEOTRACES/GEOTRACES_IDP2021_v1/seawater/netcdf/GEOTRACES_IDP2021_Seawater_Discrete_Sample_Data_v1/GEOTRACES_IDP2021_Seawater_Discrete_Sample_Data_v1.nc
 > ```
 >
 > The GEOTRACES data management committee does not allow third-party distribution of its data and does not provide a public URL pointing directly to the data, which prevents this package from downloading the data for you.
@@ -52,21 +45,19 @@ Simply use the `GEOTRACES.observations` function. For example, to get cadmium da
 
 ```julia
 julia> obs = GEOTRACES.observations("Cd")
-6935×7 DataFrame
-  Row │ lat       lon      depth      cruise  station  date                 Cd
-      │ Float32   Float32  Quantity…  String  String   DateTime…            Quantity…
-──────┼──────────────────────────────────────────────────────────────────────────────────────
-    1 │ -49.5472  307.312     10.0 m  GA02    001      2011-03-05T19:28:00  0.0528 nmol kg⁻¹
-    2 │ -49.5472  307.312     25.0 m  GA02    001      2011-03-05T19:28:00  0.0697 nmol kg⁻¹
-    3 │ -49.5472  307.312     51.0 m  GA02    001      2011-03-05T19:28:00  0.1557 nmol kg⁻¹
-  ⋮   │    ⋮         ⋮         ⋮        ⋮        ⋮              ⋮                  ⋮
- 6933 │  48.65    233.333   1101.0 m  GPpr07  P4       2012-08-17T00:18:42  1.0396 nmol kg⁻¹
- 6934 │  48.65    233.333   1198.0 m  GPpr07  P4       2012-08-17T00:18:42  1.0376 nmol kg⁻¹
- 6935 │  48.65    233.333   1300.0 m  GPpr07  P4       2012-08-17T00:18:42  1.0307 nmol kg⁻¹
-                                                                            6929 rows omitted
+10118×7 DataFrame
+   Row │ lat      lon      depth      cruise  station  date                 Cd
+       │ Float32  Float32  Quantity…  String  String   DateTime…            Quantity…
+───────┼───────────────────────────────────────────────────────────────────────────────────────
+     1 │ -50.594  308.359     10.0 m  GA02    1        2011-03-05T19:50:30   0.05282 nmol kg⁻¹
+     2 │ -50.594  308.359     25.0 m  GA02    1        2011-03-05T19:50:30   0.06973 nmol kg⁻¹
+     3 │ -50.594  308.359     51.0 m  GA02    1        2011-03-05T19:50:30   0.15567 nmol kg⁻¹
+   ⋮   │    ⋮        ⋮         ⋮        ⋮        ⋮              ⋮                   ⋮
+ 10116 │ -44.119  146.221    740.7 m  GS01    (2)      2018-01-11T15:24:00  0.509746 nmol kg⁻¹
+ 10117 │ -44.119  146.221    887.9 m  GS01    (2)      2018-01-11T15:24:00  0.649988 nmol kg⁻¹
+ 10118 │ -44.119  146.221    939.2 m  GS01    (2)      2018-01-11T15:24:00  0.686353 nmol kg⁻¹
+                                                                             10112 rows omitted
 ```
-
-> Note: In prior versions (< v2.0.0), `GEOTRACES.observations` used to return a vector with metadata. Since v2.0.0, `GEOTRACES.observations` returns tables from [DataFrames.jl](https://github.com/JuliaData/DataFrames.jl), which is quickly becoming the standard for handling tabular data in Julia.
 
 ### Variable names made easy (with your help!)
 
@@ -76,13 +67,14 @@ To check which variable they correspond to, you can do (sticking with cadmium as
 
 ```julia
 julia> GEOTRACES.variable("Cd")
-var70 (698 × 1866)
+var85 (698 × 3149)
   Datatype:    Float32
   Dimensions:  N_SAMPLES × N_STATIONS
   Attributes:
    long_name            = Cd_D_CONC_BOTTLE
    units                = nmol/kg
    comment              = Concentration of dissolved Cd
+   ancillary_variables  = var85_qc var85_err
    C_format             = %.3f
    FORTRAN_format       = F12.3
    _FillValue           = -1.0e10
@@ -95,25 +87,14 @@ GEOTRACES.jl provides a helper function, `matchingvariables`, to find variable n
 
 ```julia
 julia> GEOTRACES.matchingvariables("ni_")
-18-element Vector{Pair{String, String}}:
-      "var83" => "Ni_D_CONC_BOTTLE"
- "var333_STD" => "Standard deviation of Ni_SPT_CONC_PUMP"
- "var267_STD" => "Standard deviation of Ni_TPL_CONC_BOTTLE"
-     "var267" => "Ni_TPL_CONC_BOTTLE"
- "var384_STD" => "Standard deviation of Ni_TPL_CONC_FISH"
-     "var159" => "Ni_D_CONC_FISH"
- "var159_STD" => "Standard deviation of Ni_D_CONC_FISH"
-     "var333" => "Ni_SPT_CONC_PUMP"
-     "var431" => "Ni_CELL_CONC_BOTTLE"
-     "var384" => "Ni_TPL_CONC_FISH"
-  "var83_STD" => "Standard deviation of Ni_D_CONC_BOTTLE"
- "var266_STD" => "Standard deviation of Ni_TP_CONC_BOTTLE"
-     "var266" => "Ni_TP_CONC_BOTTLE"
-     "var383" => "Ni_TP_CONC_FISH"
- "var332_STD" => "Standard deviation of Ni_LPT_CONC_PUMP"
- "var383_STD" => "Standard deviation of Ni_TP_CONC_FISH"
-     "var331" => "Ni_TP_CONC_PUMP"
-     "var332" => "Ni_LPT_CONC_PUMP"
+41-element Vector{Pair{String, String}}:
+    "var165" => "Ni_60_58_D_DELTA_FISH"
+    "var401" => "Ni_SPT_CONC_PUMP"
+    "var351" => "Ni_TP_CONC_BOTTLE"
+             ⋮
+ "var402_qc" => "Quality flag of Ni_SPL_CONC_PUMP"
+    "var402" => "Ni_SPL_CONC_PUMP"
+ "var435_qc" => "Quality flag of Ni_TP_CONC_FISH"
 ```
 
 ### Joining tracers
@@ -122,18 +103,18 @@ Sometimes, you want to extract data for two or more tracers but *only where/when
 
 ```julia
 julia> obs = GEOTRACES.observations("Cd", "PO₄", "DFe") # Cd, PO₄, and DFe obs with units
-5515×9 DataFrame
-  Row │ lat       lon      depth      cruise  station  date                 Cd                  PO₄             DFe
-      │ Float32   Float32  Quantity…  String  String   DateTime…            Quantity…           Quantity…       Quantity…
-──────┼────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-    1 │ -49.5472  307.312     10.0 m  GA02    001      2011-03-05T19:28:00  0.0528 nmol kg⁻¹    1.01 μmol kg⁻¹  0.52 nmol kg⁻¹
-    2 │ -49.5472  307.312     10.0 m  GA02    001      2011-03-05T19:28:00  0.0528 nmol kg⁻¹    1.01 μmol kg⁻¹  0.52 nmol kg⁻¹
-    3 │ -49.5472  307.312     25.0 m  GA02    001      2011-03-05T19:28:00  0.0697 nmol kg⁻¹    2.37 μmol kg⁻¹  0.37 nmol kg⁻¹
-  ⋮   │    ⋮         ⋮         ⋮        ⋮        ⋮              ⋮                   ⋮                 ⋮                 ⋮
- 5513 │ -10.5005  208.0     5101.2 m  GP16    36       2013-12-17T00:02:27  0.7295 nmol kg⁻¹    2.32 μmol kg⁻¹  0.44 nmol kg⁻¹
- 5514 │ -10.5005  208.0     5125.4 m  GP16    36       2013-12-17T00:02:27  0.720312 nmol kg⁻¹  2.31 μmol kg⁻¹  0.482927 nmol kg⁻¹
- 5515 │ -10.5005  208.0     5125.4 m  GP16    36       2013-12-17T00:02:27  0.720312 nmol kg⁻¹  2.31 μmol kg⁻¹  0.482927 nmol kg⁻¹
-                                                                                                                  5509 rows omitted
+6097×9 DataFrame
+  Row │ lat       lon      depth      cruise  station  date                 Cd                  PO₄                DFe
+      │ Float32   Float32  Quantity…  String  String   DateTime…            Quantity…           Quantity…          Quantity…
+──────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    1 │ -50.594   308.359     10.0 m  GA02    1        2011-03-05T19:50:30   0.05282 nmol kg⁻¹    1.012 μmol kg⁻¹      0.52 nmol kg⁻¹
+    2 │ -50.594   308.359     10.0 m  GA02    1        2011-03-05T19:50:30   0.05282 nmol kg⁻¹    1.014 μmol kg⁻¹      0.52 nmol kg⁻¹
+    3 │ -50.594   308.359     25.0 m  GA02    1        2011-03-05T19:50:30   0.06973 nmol kg⁻¹    2.367 μmol kg⁻¹      0.37 nmol kg⁻¹
+  ⋮   │    ⋮         ⋮         ⋮        ⋮        ⋮              ⋮                   ⋮                   ⋮                  ⋮
+ 6095 │ -51.4577  148.524   1481.8 m  GPpr11  (25)     2016-04-11T03:50:00     0.821 nmol kg⁻¹    2.458 μmol kg⁻¹     0.439 nmol kg⁻¹
+ 6096 │ -65.4472  139.851    295.8 m  GS01    (54)     2018-01-31T19:26:44  0.861593 nmol kg⁻¹  2.22555 μmol kg⁻¹  0.262196 nmol kg⁻¹
+ 6097 │ -63.4987  150.0     3435.7 m  GS01    (69)     2018-02-05T12:30:02  0.809597 nmol kg⁻¹  2.27572 μmol kg⁻¹  0.292817 nmol kg⁻¹
+                                                                                                                     6091 rows omitted
 ```
 
 ### Arranging observations in transects
@@ -143,7 +124,7 @@ If you want the GEOTRACES data organized into cruise transects and profiles, thi
 ```julia
 julia> Cd = GEOTRACES.transects("Cd")
 Transects of Cd
-(Cruises GA02, GA03, GA04, GA10, GA11, GI04, GIPY01, GIPY02, GIPY04, GIPY05, GIPY06, GIPY13, GP02, GP13, GP16, GP18, GPpr01, GPpr02, and GPpr07.)
+(Cruises GA02, GA03, GA04N, GA10, GA11, GI04, GIPY01, GIPY02, GIPY04, GIPY05, GIPY06, GIPY13, GIpr05, GN01, GN02, GN03, GN04, GP02, GP13, GP16, GP18, GP19, GPc03, GPc06, GPpr01, GPpr02, GPpr07, GPpr08, GPpr11, and GS01.)
 ```
 
 to access all the transects that have Cadmium concentrations, and explore the data transect by transect, you can append `.transects` and chose a cruise, e.g.,
@@ -155,33 +136,33 @@ Cruise GA02
 ┌─────────┬─────────────────────┬──────────┬─────────┐
 │ Station │                Date │      Lat │     Lon │
 ├─────────┼─────────────────────┼──────────┼─────────┤
-│     001 │ 2011-03-05T19:28:00 │ -49.5472 │ 307.312 │
-│     002 │ 2010-05-02T19:36:57 │  64.0001 │  325.75 │
-│     002 │ 2011-03-06T23:17:05 │ -48.8942 │ 311.265 │
-│     003 │ 2011-03-08T01:17:59 │   -46.92 │   312.8 │
-│     003 │ 2010-05-03T21:30:00 │  62.3451 │ 324.002 │
-│     004 │ 2011-03-09T01:31:59 │ -44.7068 │ 314.464 │
-│     005 │ 2011-03-10T00:58:29 │ -42.3713 │ 315.974 │
+│       1 │ 2011-03-05T19:50:30 │  -50.594 │ 308.359 │
+│       2 │ 2010-05-02T22:44:44 │  64.0002 │  325.75 │
+│       2 │ 2011-03-06T23:27:34 │ -48.9071 │ 311.244 │
+│       3 │ 2010-05-03T22:27:44 │  62.3452 │ 324.002 │
+│       3 │ 2011-03-08T01:53:49 │ -46.9243 │ 312.793 │
+│       3 │ 2012-08-03T14:29:29 │  57.2111 │ 318.401 │
+│       4 │ 2011-03-09T01:55:29 │ -44.7052 │ 314.461 │
 │    ⋮    │          ⋮          │    ⋮     │    ⋮    │
 └─────────┴─────────────────────┴──────────┴─────────┘
-                                       48 rows omitted
+                                       53 rows omitted
 ```
 
 which contains all the profiles of the GA02 cruise. You can further explore profiles by appending `.profiles` and selecting a profile, e.g.,
 
 ```julia
 julia> Cd_GA02_profile1 = Cd_GA02.profiles[1]
-Depth profile at Station 001 2011-03-05T19:28:00 (49.5S, 307.3E)
+Depth profile at Station 1 2011-03-05T19:50:30 (50.6S, 308.4E)
 ┌───────┬───────────────────┐
 │ Depth │ Value [nmol kg⁻¹] │
 ├───────┼───────────────────┤
-│  10.0 │            0.0528 │
-│  25.0 │            0.0697 │
-│  51.0 │            0.1557 │
-│  74.0 │            0.3743 │
-│ 100.0 │            0.4684 │
-│ 151.0 │            0.5047 │
-│ 200.0 │             0.533 │
+│  10.0 │           0.05282 │
+│  25.0 │           0.06973 │
+│  51.0 │           0.15567 │
+│  74.0 │           0.37431 │
+│ 100.0 │           0.46844 │
+│ 151.0 │           0.50468 │
+│ 200.0 │           0.53303 │
 │   ⋮   │         ⋮         │
 └───────┴───────────────────┘
               17 rows omitted
@@ -192,13 +173,13 @@ Finally, you can access the vectors of concentration values (with units!) and de
 ```julia
 julia> Cd_GA02_profile1.values
 24-element Vector{Unitful.Quantity{Float32, 𝐍 𝐌⁻¹, Unitful.FreeUnits{(kg⁻¹, nmol), 𝐍 𝐌⁻¹, nothing}}}:
- 0.0528f0 nmol kg⁻¹
- 0.0697f0 nmol kg⁻¹
- 0.1557f0 nmol kg⁻¹
-                  ⋮
- 0.6946f0 nmol kg⁻¹
- 0.6997f0 nmol kg⁻¹
- 0.7067f0 nmol kg⁻¹
+ 0.05282f0 nmol kg⁻¹
+ 0.06973f0 nmol kg⁻¹
+ 0.15567f0 nmol kg⁻¹
+                   ⋮
+ 0.69459f0 nmol kg⁻¹
+ 0.69974f0 nmol kg⁻¹
+ 0.70673f0 nmol kg⁻¹
 
 julia> Cd_GA02_profile1.depths
 24-element Vector{Float64}:
@@ -211,6 +192,6 @@ julia> Cd_GA02_profile1.depths
  2312.0
 ```
 
-> Note that [OceanographyCruises.jl](https://github.com/briochemc/OceanographyCruises.jl) will likely undergo breaking changes soon to also leverage the tabular data functionality of DataFrames.jl. So this part of the API for GEOTRACES.jl may change accordingly.
+> Note I will simply move the functionality of [OceanographyCruises.jl](https://github.com/briochemc/OceanographyCruises.jl) (e.g., finding a transect "cruise track" using a salesman-problem algorithm) into GEOTRACES and apply functions directly to the dataframe returned by `observations`.
 
 I hope you find this tool useful! Suggestions and PRs welcome!

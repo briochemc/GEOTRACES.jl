@@ -10,7 +10,7 @@ using DataFrames
 
 const metadatakeys=("lat", "lon", "depth", "cruise", "station", "date") # default
 
-GEOTRACES_IDP17_DiscreteSamples_path() = get(ENV, "GEOTRACES_IDP17_PATH", joinpath(homedir(), "Data/GEOTRACES/GEOTRACES_IDP2017_v2/discrete_sample_data/netcdf/GEOTRACES_IDP2017_v2_Discrete_Sample_Data.nc"))
+GEOTRACES_IDP21_DiscreteSamples_path() = get(ENV, "GEOTRACES_IDP21_PATH", joinpath(homedir(), "Data/GEOTRACES/GEOTRACES_IDP2021_v1/seawater/netcdf/GEOTRACES_IDP2021_Seawater_Discrete_Sample_Data_v1/GEOTRACES_IDP2021_Seawater_Discrete_Sample_Data_v1.nc"))
 
 include("helper_functions.jl")
 
@@ -70,8 +70,8 @@ function transects(obs::DataFrame, tracer::String)
     df_bycruise = groupby(obs, :cruise)
     for (cruise, cruise_df) in pairs(df_bycruise)
         df_byprofile = groupby(cruise_df, [:lat, :lon, :station, :date])
-        profiles = [DepthProfile(station = Station(name=string(k.station), lat=k.lat, lon=k.lon, date=k.date), 
-                                 depths=ustrip.(v.depth), 
+        profiles = [DepthProfile(station = Station(name=string(k.station), lat=k.lat, lon=k.lon, date=k.date),
+                                 depths=ustrip.(v.depth),
                                  values=v[:,tracer]) for (k,v) in pairs(df_byprofile)]
         push!(ts, Transect(tracer=tracer, cruise=cruise.cruise, profiles=profiles))
     end
@@ -121,14 +121,14 @@ x = observations(tracer1; QCmax = 3)
 ```
 """
 function observations(ds::Dataset, tracers::String...; metadatakeys=metadatakeys, QCmax=1)
-    dfs = (observations(ds, tracer; metadatakeys, QCmax) for tracer in tracers) 
+    dfs = (observations(ds, tracer; metadatakeys, QCmax) for tracer in tracers)
     return innerjoin(dfs..., on=collect(metadatakeys))
 end
 function observations(ds::Dataset, tracer::String; metadatakeys=metadatakeys, QCmax=1)
     f = unitfunction(ds[varname(tracer)].attrib["units"])
     var = ds[varname(tracer)]
     v = var[:]
-    qcv = ds[qcvarname(tracer)].var[:]
+    qcv = ds[qcvarname(tracer)].var[:] .|> Char
     ikeep = findall(parse.(Int, qcv) .≤ QCmax)
     ikeep = CartesianIndices(size(qcv))[ikeep]
     GEOTRACESmetadatakeys = varname.(metadatakeys)
@@ -160,13 +160,13 @@ by the `observations` function.
 function qualitycontrols(ds::Dataset, tracers::String...)
     vs = ((ds[varname(tracer)][:] for tracer in tracers)...,)
     ikeep = findall(i -> !any(ismissing.(getindex.(vs, i))), eachindex(vs[1]))
-    qcvs = ((ds[qcvarname(tracer)].var[:] for tracer in tracers)...,)
+    qcvs = ((ds[qcvarname(tracer)].var[:] .|> Char for tracer in tracers)...,)
     return ((parse.(Int, view(qcv, ikeep)) for qcv in qcvs)...,)
 end
 function qualitycontrols(ds::Dataset, tracer::String)
     v = ds[varname(tracer)][:]
     ikeep = findall(!ismissing, v)
-    qcv = ds[qcvarname(tracer)].var[:]
+    qcv = ds[qcvarname(tracer)].var[:] .|> Char
     return parse.(Int, view(qcv, ikeep))
 end
 
@@ -176,7 +176,7 @@ end
 Returns the GEOTRACES metadata for given tracers.
 """
 function metadata(ds::Dataset, tracers::String...; metadatakeys=("lat", "lon", "depth"), QCmax=1)
-    qcvs = ((ds[qcvarname(tracer)].var[:] for tracer in tracers)...,)
+    qcvs = ((ds[qcvarname(tracer)].var[:] .|> Char for tracer in tracers)...,)
     ikeep = findall(i -> all((parse.(Int, getindex.(qcvs, i))) .≤ QCmax), eachindex(qcvs[1]))
     ikeep = CartesianIndices(size(qcvs[1]))[ikeep]
     GEOTRACESmetadatakeys = varname.(metadatakeys)
@@ -221,7 +221,7 @@ for f in [:observations, :metadata, :transect, :transects, :list_of_cruises,
          :standarddeviations, :matchingvariables, :observations_with_std]
     @eval begin
         $f(args...; kwargs...) =
-        Dataset(GEOTRACES_IDP17_DiscreteSamples_path(), "r") do ds
+        Dataset(GEOTRACES_IDP21_DiscreteSamples_path(), "r") do ds
              $f(ds, args...; kwargs...)
         end
     end

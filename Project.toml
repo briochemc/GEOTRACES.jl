@@ -1,7 +1,7 @@
 name = "GEOTRACES"
 uuid = "0fd43d8d-f157-424e-aaf7-32776c24e0de"
 authors = ["Benoit Pasquier <briochemc@gmail.com>"]
-version = "0.2.1"
+version = "0.3.0"
 
 [deps]
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
@@ -14,6 +14,7 @@ Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
 
 [compat]
 DataFrames = "1"
+DataStructures = "v0.18"
 Match = "1"
 Measurements = "2"
 NCDatasets = "0.9, 0.10, 0.11"
@@ -24,6 +25,7 @@ julia = "1"
 [extras]
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+DataStructures = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"
 
 [targets]
-test = ["Test", "Random"]
+test = ["Test", "Random", "DataStructures"]

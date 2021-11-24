@@ -59,21 +59,19 @@ varname(tracer::String) = @match lowercase(tracer) begin
     "pressure"                                                            => "var1"
     "depth" || "depths"                                                   => "var2"
     "date" || "datetime" || "date/time" || "date and time" || "date time" => "date_time"
-    "t" || "temp" || "temperature"                                        => "var7"
-    "salinity"                                                            => "var8"
-    "he" || "helium"                                                      => "var14"
-    "o2" || "o₂" || "oxygen" || "dioxygen"                                => "var19"
-    "p" || "po₄" || "po4" || "phosphate"                                  => "var21"
-    "no₃" || "no3" || "nitrate"                                           => "var23"
-    "si" || "si(oh)₄" || "silicate"                                       => "var24"
-    "cd" || "cadmium"                                                     => "var70"
-    "δcd" || "δ¹¹⁰cd" || "δ110cd" || "δcadmium"                           => "var116"
-    "fe" || "iron" || "dissolved iron" || "dfe"                           => "var73"
-    "δfe" || "δ⁵⁴fe" || "δ54fe" || "δiron"                                => "var117"
-    "ni" || "nickel"                                                      => "var83"
-    "nd" || "neodymium"                                                   => "var94"
-    "end" || "εnd" || "eneodymium" || "εneodymium"                        => "var105"
-    "v" || "vanadium"                                                     => "var88"
+    "he" || "helium"                                                      => "var22"
+    "o2" || "o₂" || "oxygen" || "dioxygen"                                => "var35"
+    "p" || "po₄" || "po4" || "phosphate"                                  => "var37"
+    "no₃" || "no3" || "nitrate"                                           => "var40"
+    "si" || "si(oh)₄" || "silicate"                                       => "var39"
+    "cd" || "cadmium"                                                     => "var85"
+    "δcd" || "δ¹¹⁰cd" || "δ110cd" || "δcadmium"                           => "var158"
+    "fe" || "iron" || "dissolved iron" || "dfe"                           => "var88"
+    "δfe" || "δ⁵⁴fe" || "δ54fe" || "δiron"                                => "var160"
+    "ni" || "nickel"                                                      => "var104"
+    "nd" || "neodymium"                                                   => "var259"
+    "end" || "εnd" || "eneodymium" || "εneodymium"                        => "var251"
+    "v" || "vanadium"                                                     => "var109"
     _ => tracer
 end
 
@@ -104,7 +102,7 @@ stdvarname(tracer::String) = string(varname(tracer), "_STD")
 
 Returns the GEOTRACES variable name of the quality control of tracer `str`.
 """
-qcvarname(tracer::String) = string(varname(tracer), "_QC")
+qcvarname(tracer::String) = string(varname(tracer), "_qc")
 
 
 
@@ -123,9 +121,9 @@ unitfunction(str::String) = @match str begin
     "fmol/kg"                            => x -> x * u"fmol/kg"
     "nmol/kg"                            => x -> x * u"nmol/kg"
     "umol/kg"                            => x -> x * u"μmol/kg"
-    "per mil"                            => x -> x * u"permille"
+    "per mil" || "per 10^3"              => x -> x * u"permille"
     "TU"                                 => x -> x * 0.118u"Bq/L"
-    "per 10000"                          => x -> x * u"pertenthousand"
+    "per 10000" || "per 10^4"            => x -> x * u"pertenthousand"
     "uBq/kg"                             => x -> x * u"μBq/kg"
     "mBq/kg"                             => x -> x * u"mBq/kg"
     "atoms/kg"                           => x -> x * u"1/kg"
