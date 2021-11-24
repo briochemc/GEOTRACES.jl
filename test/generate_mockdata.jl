@@ -6,7 +6,7 @@ rng = MersenneTwister(1234)
 # Create mock data in a temporary directory
 mockdir = mktempdir(homedir())
 mockdata_path = joinpath(mockdir, "GEOTRACES_mockdata.nc")
-ENV["GEOTRACES_IDP17_PATH"] = mockdata_path 
+ENV["GEOTRACES_IDP17_PATH"] = mockdata_path
 
 ds = Dataset(mockdata_path, "c")
 
@@ -376,7 +376,7 @@ nclongitude[:] = rand(eltype(nclongitude.var), size(nclongitude)...)
 nclatitude[:] = rand(eltype(nclatitude.var), size(nclatitude)...)
 ncdate_time[:] = rand(eltype(ncdate_time.var), size(ncdate_time)...)
 # QC characters 1:5
-QC = [s[1] for s in string.([1,2,3,4,5])]
+QC = [s[1] |> Int8 for s in string.([1,2,3,4,5])]
 # pressure
 ncvar1[:] = rand(eltype(ncvar1.var), size(ncvar1)...)
 ncvar1_QC[:] = rand(QC, size(ncvar1_QC)...)

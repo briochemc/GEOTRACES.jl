@@ -20,7 +20,7 @@ using DataFrames
 #end
 
 @testset "Cruises" begin
-    @test unique(GEOTRACES.list_of_cruises()) == ["GA01", "GA02", "GA03", "GA04", "GA06", "GA10", "GA11", "GAc01", "GAc02", "GI04", "GIPY01", "GIPY02", "GIPY04", "GIPY05", "GIPY06", "GIPY11", "GIPY13", "GIpr01", "GP02", "GP13", "GP16", "GP18", "GPc01", "GPc02", "GPc03", "GPpr01", "GPpr02", "GPpr04", "GPpr05", "GPpr07", "GPpr10"]
+    @test unique(GEOTRACES.list_of_cruises()) == ["GA01", "GA02", "GA03", "GA04N", "GA04S", "GA06", "GA08", "GA10", "GA11", "GA13", "GAc01", "GAc02", "GAc03", "GApr08", "GApr09", "GI01", "GI02", "GI03", "GI04", "GI05", "GI06", "GIPY01", "GIPY02", "GIPY04", "GIPY05", "GIPY06", "GIPY11", "GIPY13", "GIpr01", "GIpr05", "GIpr06", "GN01", "GN02", "GN03", "GN04", "GN05", "GP02", "GP06", "GP12", "GP13", "GP15", "GP16", "GP18", "GP19", "GPc01", "GPc02", "GPc03", "GPc05", "GPc06", "GPpr01", "GPpr02", "GPpr04", "GPpr05", "GPpr07", "GPpr08", "GPpr10", "GPpr11", "GS01", "GSc01", "GSc02"]
     @test GEOTRACES.list_of_stations() isa Vector{String}
     @test GEOTRACES.cruisetrack("GAO03") isa CruiseTrack
 end
@@ -64,20 +64,19 @@ end
 @testset "helper functions" begin
     @test GEOTRACES.matchingvariables("cd") isa Vector{Pair{String, String}}
     @testset "variable names" begin
-        @test GEOTRACES.varname("T") == "var7"
-        @test GEOTRACES.varname("salinity") == "var8"
-        @test GEOTRACES.varname("He") == "var14"
-        @test GEOTRACES.varname("O2") == "var19"
-        @test GEOTRACES.varname("P") == "var21"
-        @test GEOTRACES.varname("NO3") == "var23"
-        @test GEOTRACES.varname("Si") == "var24"
-        @test GEOTRACES.varname("Cd") == "var70"
-        @test GEOTRACES.varname("δCd") == "var116"
-        @test GEOTRACES.varname("Fe") == "var73"
-        @test GEOTRACES.varname("δFe") == "var117"
-        @test GEOTRACES.varname("Ni") == "var83"
-        @test GEOTRACES.varname("Nd") == "var94"
-        @test GEOTRACES.varname("eNd") == "var105"
-        @test GEOTRACES.varname("εNd") == "var105"
+        @test GEOTRACES.varname("He") == "var22"
+        @test GEOTRACES.varname("O2") == "var35"
+        @test GEOTRACES.varname("P") == "var37"
+        @test GEOTRACES.varname("NO3") == "var40"
+        @test GEOTRACES.varname("Si") == "var39"
+        @test GEOTRACES.varname("Cd") == "var85"
+        @test GEOTRACES.varname("δCd") == "var158"
+        @test GEOTRACES.varname("Fe") == "var88"
+        @test GEOTRACES.varname("δFe") == "var160"
+        @test GEOTRACES.varname("Ni") == "var104"
+        @test GEOTRACES.varname("Nd") == "var259"
+        @test GEOTRACES.varname("eNd") == "var251"
+        @test GEOTRACES.varname("εNd") == "var251"
+        @test GEOTRACES.varname("V") == "var109"
     end
 end
