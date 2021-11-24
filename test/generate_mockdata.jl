@@ -6,7 +6,7 @@ rng = MersenneTwister(1234)
 # Create mock data in a temporary directory
 mockdir = mktempdir(homedir())
 mockdata_path = joinpath(mockdir, "GEOTRACES_mockdata.nc")
-ENV["GEOTRACES_IDP17_PATH"] = mockdata_path
+ENV["GEOTRACES_IDP21_PATH"] = mockdata_path
 
 ds = Dataset(mockdata_path, "c")
 
