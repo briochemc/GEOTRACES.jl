@@ -20,9 +20,10 @@ using DataFrames
 #end
 
 @testset "Cruises" begin
-    @test unique(GEOTRACES.list_of_cruises()) == ["GA01", "GA02", "GA03", "GA04N", "GA04S", "GA06", "GA08", "GA10", "GA11", "GA13", "GAc01", "GAc02", "GAc03", "GApr08", "GApr09", "GI01", "GI02", "GI03", "GI04", "GI05", "GI06", "GIPY01", "GIPY02", "GIPY04", "GIPY05", "GIPY06", "GIPY11", "GIPY13", "GIpr01", "GIpr05", "GIpr06", "GN01", "GN02", "GN03", "GN04", "GN05", "GP02", "GP06", "GP12", "GP13", "GP15", "GP16", "GP18", "GP19", "GPc01", "GPc02", "GPc03", "GPc05", "GPc06", "GPpr01", "GPpr02", "GPpr04", "GPpr05", "GPpr07", "GPpr08", "GPpr10", "GPpr11", "GS01", "GSc01", "GSc02"]
+    IDP21_cruise_list = ["GA01", "GA02", "GA03", "GA04N", "GA04S", "GA06", "GA08", "GA10", "GA11", "GA13", "GAc01", "GAc02", "GAc03", "GApr08", "GApr09", "GI01", "GI02", "GI03", "GI04", "GI05", "GI06", "GIPY01", "GIPY02", "GIPY04", "GIPY05", "GIPY06", "GIPY11", "GIPY13", "GIpr01", "GIpr05", "GIpr06", "GN01", "GN02", "GN03", "GN04", "GN05", "GP02", "GP06", "GP12", "GP13", "GP15", "GP16", "GP18", "GP19", "GPc01", "GPc02", "GPc03", "GPc05", "GPc06", "GPpr01", "GPpr02", "GPpr04", "GPpr05", "GPpr07", "GPpr08", "GPpr10", "GPpr11", "GS01", "GSc01", "GSc02"]
+    @test unique(GEOTRACES.list_of_cruises()) == IDP21_cruise_list
     @test GEOTRACES.list_of_stations() isa Vector{String}
-    @test GEOTRACES.cruisetrack("GAO03") isa CruiseTrack
+    @test GEOTRACES.cruisetrack("GA03") isa CruiseTrack
 end
 
 @testset "observations" begin
