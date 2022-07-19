@@ -34,17 +34,24 @@ variable(ds::Dataset, tracer::String) = println(ds[varname(tracer)])
 # Special treatment for metadata
 
 metadatakeyvaluepair(v, idx) = @match name(v) begin
-    "metavar1"  => (:cruise => reduce.(string, filter.(!=('\0'), eachcol(v.var[:,:])))[[i.I[2] for i in idx]])
-    "metavar2"  => (:station => string.(reduce.(string, filter.(!=('\0'), eachcol(v.var[:,:])))[[i.I[2] for i in idx]]))
-    "longitude" => (:lon => float.(v.var[[i.I[2] for i in idx]]))
-    "latitude"  => (:lat => float.(v.var[[i.I[2] for i in idx]]))
-    "var2"      => (:depth => unitfunction(v.attrib["units"]).(float.(v.var[idx])))
-    "var1"      => (:pressure => unitfunction(v.attrib["units"]).(float.(v.var[idx])))
-    "date_time" => (:date => DateTime.(v[[i.I[2] for i in idx]]))
-    _           => (Symbol(name(v)) => float.(v.var[idx]))
+    "metavar1"  => (:cruise => readcruise(v, idx))
+    "metavar2"  => (:station => readstation(v, idx))
+    "longitude" => (:lon => readlongitude(v, idx))
+    "latitude"  => (:lat => readlatitude(v, idx))
+    "var2"      => (:depth => readdepth(v, idx))
+    "var1"      => (:pressure => readpressure(v, idx))
+    "date_time" => (:date => readdate(v, idx))
+    _           => (Symbol(name(v)) => readvariable(v, idx))
 end
 
-
+readcruise(v, idx) = reduce.(string, filter.(!=('\0'), eachcol(v.var[:,:])))[[i.I[2] for i in idx]]
+readstation(v, idx) = string.(reduce.(string, filter.(!=('\0'), eachcol(v.var[:,:])))[[i.I[2] for i in idx]])
+readlongitude(v, idx) = float.(v[[i.I[2] for i in idx]])
+readlatitude(v, idx) = float.(v[[i.I[2] for i in idx]])
+readdepth(v, idx) = unitfunction(v.attrib["units"]).(float.(v.var[idx]))
+readpressure(v, idx) = unitfunction(v.attrib["units"]).(float.(v.var[idx]))
+readdate(v, idx) = DateTime.(v[[i.I[2] for i in idx]])
+readvariable(v, idx) = float.(v.var[idx])
 
 """
     varname(tracer)
